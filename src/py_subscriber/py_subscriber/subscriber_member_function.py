@@ -7,11 +7,10 @@ import cv2
 
 class MinimalSubscriber(Node):
     def __init__(self):
-        print("Subscriber runned")
-        super().__init__('minimal_subscriber')
+        super().__init__('camera_reader')
         self.subscription = self.create_subscription(
             Image,
-            'topic',
+            'camera_topic',
             self.listener_callback,
             10)
         self.subscription  # prevent unused variable warning

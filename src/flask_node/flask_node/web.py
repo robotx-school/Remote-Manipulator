@@ -1,50 +1,91 @@
 import rclpy
 from rclpy.node import Node
 from cv_bridge import CvBridge
-from std_msgs.msg import String
 from sensor_msgs.msg import Image
-import cv2
-from flask import Flask, render_template
+from flask import Flask, render_template, Response
 import threading
-import os
+import numpy as np
+import cv2
+import time
 
-class FlaskNode(Node):
-    def __init__(self):
+class CameraSub(Node):
+    def __init__(self, state):
         super().__init__('flask')
-        self.subscription = self.create_subscription(
-            Image,
-            'camera_topic',
-            self.listener_callback,
-            10)
-        self.subscription  # prevent unused variable warning
+        # Init CV and Camera topics readers
         self.br = CvBridge()
-        self.flask_app = Flask(__name__)
+        self.general_camera_sub = self.create_subscription(
+            Image,
+            'camera_general',
+            self.general_camera_callback,
+            10)
+        self.general_camera_sub
+        
+        self.field_camera_sub = self.create_subscription(
+            Image,
+            'camera_field',
+            self.field_camera_callback,
+            10)
+        self.general_camera_sub
+        self.field_camera_sub
+        self.state = state
         
 
+    def general_camera_callback(self, image):
+        self.state.general_camera_image = self.br.imgmsg_to_cv2(image)
 
-        @self.flask_app.route("/")
-        def index():
+    def field_camera_callback(self, image):
+        self.state.field_camera_image = self.br.imgmsg_to_cv2(image)
+        cv2.imwrite("recv.png", self.state.field_camera_image)
+
+class StateManager:
+    def __init__(self) -> None:
+        self.general_camera_image = None
+        self.field_camera_image = None
+
+class FlaskApp:
+    def __init__(self, state) -> None:
+        self.app = Flask(__name__)
+        self.state = state
+
+        @self.app.route("/")
+        def __index():
             return render_template("index.html")
-
-        threading.Thread(target=lambda: self.flask_app.run(host='0.0.0.0', port=8080)).start()
-
-
-    def listener_callback(self, msg):
-        print("Image")
-        current_frame = self.br.imgmsg_to_cv2(msg)
+        
+        @self.app.route('/general_camera_feed')
+        def general_video_feed():
+            return Response(self.gen_img("general"), mimetype='multipart/x-mixed-replace; boundary=frame')
+        
+        @self.app.route('/field_camera_feed')
+        def field_camera_feed():
+            return Response(self.gen_img("field"), mimetype='multipart/x-mixed-replace; boundary=frame')
     
-    # @self.flask_app.route("/")
-    # def index():
-    #     return "Flask works!"
+    def gen_img(self, image_type: str):
+        while True:
+            try:
+                image = self.state.general_camera_image
+                if image_type == "field":
+                    image = self.state.field_camera_image
+                ret, buffer = cv2.imencode('.jpg', image)
+                frame = buffer.tobytes()
+                time.sleep(0.05)
+                yield (b'--frame\r\n'
+                    b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
+            except cv2.error:
+                print(f"Bad {image_type} image, skipping it")
 
+    
 
 def main(args=None):
+    state = StateManager()
     rclpy.init(args=args)
 
-    minimal_subscriber = FlaskNode()
+    camera_sub = CameraSub(state)
+    app = FlaskApp(state)
+    
+    threading.Thread(target=lambda: app.app.run(port=8080, host="0.0.0.0")).start()
 
-    rclpy.spin(minimal_subscriber)
-    minimal_subscriber.destroy_node()
+    rclpy.spin(camera_sub)
+    camera_sub.destroy_node()
     rclpy.shutdown()
 
 
