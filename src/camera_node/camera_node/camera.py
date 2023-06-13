@@ -22,11 +22,11 @@ class CameraPublisher(Node):
 
         # self.send_image = cv2.imread("send_me.png")
         self.general_image = np.zeros((720, 1280, 3), dtype=np.int8)
-        self.general_image_fallback = cv2.putText(self.general_image, 'General Camera View (Showed when camera disabled in publisher)', (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 
+        self.general_image_fallback = cv2.putText(self.general_image, 'General Camera', (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 
                    1, (255, 255, 255), 2, cv2.LINE_AA)
         
         self.field_image = np.zeros((720, 1280, 3), dtype=np.int8)
-        self.field_image_fallback = cv2.putText(self.field_image, 'Field Camera View', (50, 200), cv2.FONT_HERSHEY_SIMPLEX, 
+        self.field_image_fallback = cv2.putText(self.field_image, 'Field Camera', (50, 200), cv2.FONT_HERSHEY_SIMPLEX, 
                    5, (255, 255, 255), 2, cv2.LINE_AA)
         while True:
             # We can read images here
