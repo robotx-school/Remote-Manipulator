@@ -37,7 +37,6 @@ class CameraSub(Node):
 
     def field_camera_callback(self, image):
         self.state.field_camera_image = self.br.imgmsg_to_cv2(image)
-        cv2.imwrite("recv.png", self.state.field_camera_image)
 
 class StateManager:
     def __init__(self) -> None:
@@ -70,6 +69,18 @@ class FlaskApp:
         @self.app.route("/api/getl")
         def api_getl():
             return [10, 10, 10, 20, 30, 30]
+        
+        @self.app.route("/api/system/resume")
+        def api_system_resume():
+            pass
+
+        @self.app.route("/api/system/restart")
+        def api_system_restart():
+            pass
+
+        @self.app.route("/api/system/stop")
+        def api_system_stop():
+            pass
     
     def gen_img(self, image_type: str):
         while True:
