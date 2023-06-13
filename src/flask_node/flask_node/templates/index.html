@@ -97,16 +97,16 @@
     <div class="container">
         <h1 class="text-center cameras-header">Cameras View</h1>
         <div class="row">
-            <div class="col camera-select">
-                <h3 class="cameras-header">Select camera</h3>
-                <img src="{{ url_for('field_camera_feed') }}" width="240px" class="camera-select-image"
-                    id="select_camera">
+            <div class="col">
+                <img class="img-fluid" src="https://placehold.co/960x720">
             </div>
             <div class="col">
-                <img src="{{ url_for('general_video_feed') }}" width="960px" height="720px" id="active_image">
+                <img class="img-fluid" src="https://placehold.co/960x720">
             </div>
         </div>
+    </div>
 
+    <div class="container">
         <div class="row">
             <div class="col">
                 <h3 class="getl-table-header" id="getl-table-header">Manipulator Coords</h3>
@@ -197,6 +197,7 @@
             </div>
         </div>
     </div>
+
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"

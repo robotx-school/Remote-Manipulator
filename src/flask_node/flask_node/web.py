@@ -46,10 +46,9 @@ class StateManager:
         self.field_camera_image = None
 
 class FlaskApp:
-    def __init__(self, state) -> None:
+    def __init__(self, state, robot) -> None:
         self.app = Flask(__name__)
         self.state = state
-        self.robot = urx.Robot("192.168.2.65")
 
         @self.app.route("/")
         def __index():
@@ -104,13 +103,29 @@ class FlaskApp:
             except cv2.error:
                 print(f"Bad {image_type} image, skipping it")
 
+
+class Robot:
+    def __init__(self, ip: str, logger: object) -> None:
+        self.connected = False
+        self.logger = logger
+        self.connect_max_attempts = 5
+        connect_attempt = 0
+        while not self.connected and connect_attempt < self.connect_max_attempts:
+            try:
+                self.robot = urx.Robot(ip)
+                self.connected = True
+                self.logger.info("Connected to robot")
+            except Exception as e:
+                connect_attempt += 1
+                self.logger.error(f"Can't connect to robot, attempt ({connect_attempt}/{self.connect_max_attempts})")
+        
     
 
 def main(args=None):
     state = StateManager()
     rclpy.init(args=args)
-
     camera_sub = CameraSub(state)
+    robot = Robot(camera_sub.get_logger())
     app = FlaskApp(state)
     
     threading.Thread(target=lambda: app.app.run(port=8080, host="0.0.0.0")).start()
