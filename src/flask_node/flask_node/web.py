@@ -2,7 +2,7 @@ import rclpy
 from rclpy.node import Node
 from cv_bridge import CvBridge
 from sensor_msgs.msg import Image
-from flask import Flask, render_template, Response, request
+from flask import Flask, render_template, Response, request, jsonify
 import threading
 import numpy as np
 import cv2
@@ -18,14 +18,14 @@ class CameraSub(Node):
             Image,
             'camera_general',
             self.general_camera_callback,
-            10)
+            1)
         self.general_camera_sub
         
         self.field_camera_sub = self.create_subscription(
             Image,
             'camera_field',
             self.field_camera_callback,
-            10)
+            1)
         
 
         self.general_camera_sub
@@ -49,6 +49,7 @@ class FlaskApp:
     def __init__(self, state, robot) -> None:
         self.app = Flask(__name__)
         self.state = state
+        self.robot = robot
 
         @self.app.route("/")
         def __index():
@@ -65,12 +66,18 @@ class FlaskApp:
         @self.app.route("/api/movel", methods=['POST'])
         def api_movel():
             content = eval(request.json["movel"])
-            self.robot.movel(content, acc=0.2, vel=0.2, wait=False)
-            return {"status": True}
+            if self.robot.connected:
+                self.robot.robot_conn.movel(content, acc=0.2, vel=0.2, wait=False)
+                return jsonify({"status": True})
+            else:
+                return jsonify({"status": False})
 
         @self.app.route("/api/getl")
         def api_getl():
-            return self.robot.getl()
+            if self.robot.connected:
+                return self.robot.robot_conn.getl()
+            else:
+                return jsonify([-1] * 6) # can't get info
         
         @self.app.route("/api/system/resume")
         def api_system_resume():
@@ -112,21 +119,19 @@ class Robot:
         connect_attempt = 0
         while not self.connected and connect_attempt < self.connect_max_attempts:
             try:
-                self.robot = urx.Robot(ip)
+                self.robot_conn = urx.Robot(ip)
                 self.connected = True
                 self.logger.info("Connected to robot")
             except Exception as e:
                 connect_attempt += 1
-                self.logger.error(f"Can't connect to robot, attempt ({connect_attempt}/{self.connect_max_attempts})")
-        
-    
+                self.logger.error(f"Can't connect to robot, attempt ({connect_attempt}/{self.connect_max_attempts}); More info: {e}")
 
 def main(args=None):
     state = StateManager()
     rclpy.init(args=args)
     camera_sub = CameraSub(state)
-    robot = Robot(camera_sub.get_logger())
-    app = FlaskApp(state)
+    robot = Robot("192.168.2.65", camera_sub.get_logger())
+    app = FlaskApp(state, robot)
     
     threading.Thread(target=lambda: app.app.run(port=8080, host="0.0.0.0")).start()
 
