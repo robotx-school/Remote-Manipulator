@@ -7,6 +7,7 @@ import threading
 import numpy as np
 import cv2
 import time
+import urx
 
 class CameraSub(Node):
     def __init__(self, state):
@@ -31,6 +32,7 @@ class CameraSub(Node):
         self.field_camera_sub
         self.state = state
         
+        
 
     def general_camera_callback(self, image):
         self.state.general_camera_image = self.br.imgmsg_to_cv2(image)
@@ -47,6 +49,7 @@ class FlaskApp:
     def __init__(self, state) -> None:
         self.app = Flask(__name__)
         self.state = state
+        self.robot = urx.Robot("192.168.2.65")
 
         @self.app.route("/")
         def __index():
@@ -63,12 +66,12 @@ class FlaskApp:
         @self.app.route("/api/movel", methods=['POST'])
         def api_movel():
             content = eval(request.json["movel"])
-            print(content)
+            self.robot.movel(content, acc=0.2, vel=0.2, wait=False)
             return {"status": True}
 
         @self.app.route("/api/getl")
         def api_getl():
-            return [10, 10, 10, 20, 30, 30]
+            return self.robot.getl()
         
         @self.app.route("/api/system/resume")
         def api_system_resume():
@@ -80,6 +83,11 @@ class FlaskApp:
 
         @self.app.route("/api/system/stop")
         def api_system_stop():
+            pass
+
+        @self.app.route("/api/joystick")
+        def joystick_handler():
+            task = request.json["dir"]
             pass
     
     def gen_img(self, image_type: str):

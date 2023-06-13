@@ -4,7 +4,7 @@ from cv_bridge import CvBridge
 from sensor_msgs.msg import Image
 import numpy as np
 import cv2
-from config import *
+
 
 class CameraPublisher(Node):
     def __init__(self):
@@ -15,7 +15,9 @@ class CameraPublisher(Node):
         # OpenCV bridge setup 
         self.br = CvBridge()
         self.real_image = False
-        
+        GENERAL_CAPTURE_LINK = "/dev/v4l/by-path/platform-fd500000.pcie-pci-0000:01:00.0-usb-0:1.4:1.0-video-index0"
+        FIELD_CAPTURE_LINK = "/dev/v4l/by-path/platform-fd500000.pcie-pci-0000:01:00.0-usb-0:1.3:1.0-video-index0"
+
         self.general_capture = cv2.VideoCapture(GENERAL_CAPTURE_LINK)
         self.field_capture = cv2.VideoCapture(FIELD_CAPTURE_LINK)
 
