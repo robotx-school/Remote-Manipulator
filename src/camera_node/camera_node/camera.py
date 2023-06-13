@@ -1,6 +1,5 @@
 import rclpy
 from rclpy.node import Node
-
 from cv_bridge import CvBridge
 from sensor_msgs.msg import Image
 import numpy as np
@@ -16,21 +15,32 @@ class CameraPublisher(Node):
         self.br = CvBridge()
         self.real_image = False
         
-        self.cap = cv2.VideoCapture(0)
+        self.general_capture = cv2.VideoCapture(0)
+        self.field_capture = cv2.VideoCapture(1)
+        self.field_capture.set(cv2.CAP_PROP_FRAME_WIDTH, 1080) # 1280 optimal
+        self.field_capture.set(cv2.CAP_PROP_FRAME_HEIGHT, 1920) # 720 optimal
 
         # self.send_image = cv2.imread("send_me.png")
         self.general_image = np.zeros((720, 1280, 3), dtype=np.int8)
-        self.general_image = cv2.putText(self.general_image, 'General Camera View (Showed when camera disabled in publisher)', (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 
+        self.general_image_fallback = cv2.putText(self.general_image, 'General Camera View (Showed when camera disabled in publisher)', (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 
                    1, (255, 255, 255), 2, cv2.LINE_AA)
         
         self.field_image = np.zeros((720, 1280, 3), dtype=np.int8)
-        self.field_image = cv2.putText(self.field_image, 'Field Camera View', (50, 200), cv2.FONT_HERSHEY_SIMPLEX, 
+        self.field_image_fallback = cv2.putText(self.field_image, 'Field Camera View', (50, 200), cv2.FONT_HERSHEY_SIMPLEX, 
                    5, (255, 255, 255), 2, cv2.LINE_AA)
         while True:
             # We can read images here
-            # status, self.general_image = self.cap.read()
-            self.general_camera_publisher.publish(self.br.cv2_to_imgmsg(self.general_image))
-            self.field_camera_publisher.publish(self.br.cv2_to_imgmsg(self.field_image))
+            general_camera_status, general_image = self.general_capture.read()
+            field_camera_status, field_image = self.field_capture.read()
+            if general_camera_status:
+                self.general_camera_publisher.publish(self.br.cv2_to_imgmsg(general_image))
+            else:
+                self.general_camera_publisher.publish(self.br.cv2_to_imgmsg(self.general_image_fallback))
+
+            if field_camera_status:
+                self.field_camera_publisher.publish(self.br.cv2_to_imgmsg(field_image))
+            else:
+                self.field_camera_publisher.publish(self.br.cv2_to_imgmsg(self.field_image_fallback))
                    
 
 def main(args=None):

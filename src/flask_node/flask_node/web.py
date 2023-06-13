@@ -2,7 +2,7 @@ import rclpy
 from rclpy.node import Node
 from cv_bridge import CvBridge
 from sensor_msgs.msg import Image
-from flask import Flask, render_template, Response
+from flask import Flask, render_template, Response, request
 import threading
 import numpy as np
 import cv2
@@ -25,6 +25,8 @@ class CameraSub(Node):
             'camera_field',
             self.field_camera_callback,
             10)
+        
+
         self.general_camera_sub
         self.field_camera_sub
         self.state = state
@@ -58,6 +60,16 @@ class FlaskApp:
         @self.app.route('/field_camera_feed')
         def field_camera_feed():
             return Response(self.gen_img("field"), mimetype='multipart/x-mixed-replace; boundary=frame')
+
+        @self.app.route("/api/movel", methods=['POST'])
+        def api_movel():
+            content = eval(request.json["movel"])
+            print(content)
+            return {"status": True}
+
+        @self.app.route("/api/getl")
+        def api_getl():
+            return [10, 10, 10, 20, 30, 30]
     
     def gen_img(self, image_type: str):
         while True:
