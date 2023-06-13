@@ -4,6 +4,7 @@ from cv_bridge import CvBridge
 from sensor_msgs.msg import Image
 import numpy as np
 import cv2
+from config import *
 
 class CameraPublisher(Node):
     def __init__(self):
@@ -15,10 +16,11 @@ class CameraPublisher(Node):
         self.br = CvBridge()
         self.real_image = False
         
-        self.general_capture = cv2.VideoCapture(0)
-        self.field_capture = cv2.VideoCapture(1)
-        self.field_capture.set(cv2.CAP_PROP_FRAME_WIDTH, 1080) # 1280 optimal
-        self.field_capture.set(cv2.CAP_PROP_FRAME_HEIGHT, 1920) # 720 optimal
+        self.general_capture = cv2.VideoCapture(GENERAL_CAPTURE_LINK)
+        self.field_capture = cv2.VideoCapture(FIELD_CAPTURE_LINK)
+
+        self.field_capture.set(cv2.CAP_PROP_FRAME_WIDTH, 1080)
+        self.field_capture.set(cv2.CAP_PROP_FRAME_HEIGHT, 1920)
 
         # self.send_image = cv2.imread("send_me.png")
         self.general_image = np.zeros((720, 1280, 3), dtype=np.int8)
