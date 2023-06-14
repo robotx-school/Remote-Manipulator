@@ -91,6 +91,28 @@
         .joystick-right {
             margin-left: 10px;
         }
+        #movel-btn{
+            margin-bottom: 20px;
+        }
+
+        @media (max-width: 767px) {
+            .row {
+                flex-direction: column;
+            }
+
+            .col-md-6 {
+                width: 100%;
+            }
+            .camera-view {
+                margin-bottom: 20px;
+            }
+            .z-joystick {
+                margin-top: 20px;
+            }
+            #movel-btn{
+                margin-top: 20px;
+            }
+        }
     </style>
 </head>
 
@@ -98,11 +120,15 @@
     <div class="container">
         <h1 class="text-center cameras-header">Cameras View</h1>
         <div class="row">
-            <div class="col">
-                <img class="img-fluid" src="{{ url_for('field_camera_feed') }}" width="640px" height="480px">
-            </div>
-            <div class="col">
-                <img src="{{ url_for('general_video_feed') }}" height="100%">
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-6">
+                        <img src="{{ url_for('field_camera_feed') }}" class="img-fluid camera-view">
+                    </div>
+                    <div class="col-md-6">
+                        <img src="{{ url_for('general_video_feed') }}" class="img-fluid">
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -151,22 +177,22 @@
                 <h3 class="getl-table-header" id="getl-table-header">Manipulator Joystick</h3>
                 <div class="container">
                     <div class="row">
-                        <div class="col-4">
+                        <div class="col-md-4">
                             <h3>X, Y</h3>
                             <div class="btn-group-vertical w-100" role="group">
-                                <button type="button" class="btn btn-secondary"><span
+                                <button type="button" class="btn btn-secondary btn-lg"><span
                                         class="bi-caret-up-fill"></span></button>
                                 <div class="btn-group" role="group">
-                                    <button type="button" class="btn btn-secondary"><span
+                                    <button type="button" class="btn btn-secondary btn-lg"><span
                                             class="bi-caret-left-fill"></span></button>
-                                    <button type="button" class="btn btn-secondary"><span
+                                    <button type="button" class="btn btn-secondary btn-lg"><span
                                             class="bi-caret-right-fill"></span></button>
                                 </div>
-                                <button type="button" class="btn btn-secondary"><span
+                                <button type="button" class="btn btn-secondary btn-lg"><span
                                         class="bi-caret-down-fill"></span></button>
                             </div>
                         </div>
-                        <div class="col-4">
+                        <div class="col-md-4 z-joystick">
                             <h3>Z</h3>
                             <div class="btn-group-vertical w-100" role="group">
                                 <button type="button" class="btn btn-primary btn-lg"><span
