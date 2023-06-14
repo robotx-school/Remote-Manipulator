@@ -59,8 +59,6 @@ class CameraPublisherNode(Node):
         cv2.putText(img, timestamp, (0, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2, cv2.LINE_AA)
         return img
         
-        
-        
     def timer_callback(self):
         with self.reader1.lock:
             ret1 = self.reader1.ret
@@ -77,8 +75,6 @@ class CameraPublisherNode(Node):
         img2 = self.add_timestamp(img2)
         threading.Thread(target=self.publish_image, args=(img1, self.pub1_)).start()
         threading.Thread(target=self.publish_image, args=(img2, self.pub2_)).start()
-    
-
         
     def create_error_image(self):
         img = np.zeros((480, 640, 3), np.uint8)

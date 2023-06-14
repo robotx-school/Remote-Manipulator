@@ -4,7 +4,6 @@ import cv2
 from sensor_msgs.msg import Image
 from cv_bridge import CvBridge
 import time
-from termcolor import colored
 
 
 class MinimalPublisher(Node):
@@ -21,16 +20,16 @@ class MinimalPublisher(Node):
         self.get_logger().info(f'Called')
         while True:
             status, frame = self.cap.read()
-            #enc_start_time = time.time()
+            # enc_start_time = time.time()
             image_type = self.br.cv2_to_imgmsg(frame)
-            #enc_finish_time = time.time()
-            #self.get_logger().info(f'Encoding took: {enc_finish_time - enc_start_time} seconds')
-            #pub_start_time = time.time()
+            # enc_finish_time = time.time()
+            # self.get_logger().info(f'Encoding took: {enc_finish_time - enc_start_time} seconds')
+            # pub_start_time = time.time()
             self.publisher_.publish(image_type)
-            #pub_finish_time = time.time()
-            #self.get_logger().info(f'Publishing took: {pub_finish_time - pub_start_time} seconds')
-            #all_spent = (pub_finish_time - pub_start_time) + (enc_finish_time - enc_start_time)
-            #self.get_logger().info(colored(f'In sum: {all_spent} seconds - {1 / all_spent} FPS', 'green'))
+            # pub_finish_time = time.time()
+            # self.get_logger().info(f'Publishing took: {pub_finish_time - pub_start_time} seconds')
+            # all_spent = (pub_finish_time - pub_start_time) + (enc_finish_time - enc_start_time)
+            # self.get_logger().info(colored(f'In sum: {all_spent} seconds - {1 / all_spent} FPS', 'green'))
             
 
 def main(args=None):

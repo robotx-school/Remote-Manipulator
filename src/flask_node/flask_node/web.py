@@ -4,7 +4,6 @@ from cv_bridge import CvBridge
 from sensor_msgs.msg import Image
 from flask import Flask, render_template, Response, request, jsonify
 import threading
-import numpy as np
 import cv2
 import time
 import urx
@@ -26,8 +25,6 @@ class CameraSub(Node):
             'camera_field',
             self.field_camera_callback,
             1)
-        
-
         self.general_camera_sub
         self.field_camera_sub
         self.state = state
