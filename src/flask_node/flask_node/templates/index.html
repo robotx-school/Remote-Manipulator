@@ -242,14 +242,6 @@
                 timer: 1000
             });
         }
-        document.getElementById("select_camera").addEventListener('click', () => {
-            let selector_image = document.getElementById("select_camera");
-            let active_image = document.getElementById("active_image");
-            let selector_image_curr = selector_image.src;
-            let active_image_curr = active_image.src;
-            selector_image.src = active_image_curr;
-            active_image.src = selector_image_curr;
-        });
         let upd_items = ["getl-table-x", "getl-table-y", "getl-table-z",
             "getl-table-r-0", "getl-table-r-1", "getl-table-r-2"];
 
