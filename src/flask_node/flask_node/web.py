@@ -90,8 +90,27 @@ class FlaskApp:
 
         @self.app.route("/api/joystick")
         def joystick_handler():
-            task = request.json["dir"]
-            pass
+            dir_ = request.json["dir"]
+            offset = 0.05
+            dir_mapping = {
+                    "x+": (0, offset),
+                    "x-": (0, -offset),
+                    "y+": (1, offset),
+                    "y-": (1, -offset),
+                    "z+": (2, offset),
+                    "z-": (2, -offset)
+            }
+            if dir_ in list(dir_mapping.keys()):
+                if self.robot.connected:
+                    new_pos = self.robot.robot_conn.getl() # get current pose
+                    change = dir_mapping[dir_]
+                    new_pose[change[0]] += change[1]
+                    return jsonify({"status": True, "detail": "Move"})
+                else:
+                    return jsonify({"status": False, "detail": "Robot disconnected"})
+            else:
+                return jsonify({"status": False, "detail": "Invalid direction"})
+            
     
     def gen_img(self, image_type: str):
         while True:
