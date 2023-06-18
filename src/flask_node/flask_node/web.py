@@ -2,7 +2,7 @@ import rclpy
 from rclpy.node import Node
 from cv_bridge import CvBridge
 from sensor_msgs.msg import Image
-from flask import Flask, render_template, Response, request, jsonify
+from flask import Flask, render_template, Response, request, jsonify, abort
 import threading
 import cv2
 import time
@@ -67,7 +67,7 @@ class FlaskApp:
                 self.robot.robot_conn.movel(content, acc=0.2, vel=0.2, wait=False)
                 return jsonify({"status": True})
             else:
-                return jsonify({"status": False})
+                return abort(400, "Robot disconnected")
 
         @self.app.route("/api/getl")
         def api_getl():
@@ -88,9 +88,10 @@ class FlaskApp:
         def api_system_stop():
             pass
 
-        @self.app.route("/api/joystick")
+        @self.app.route("/api/joystick", methods=['POST'])
         def joystick_handler():
             dir_ = request.json["dir"]
+            self.robot.logger.info(f"Direction is: {dir_}")
             offset = 0.05
             dir_mapping = {
                     "x+": (0, offset),
@@ -104,12 +105,13 @@ class FlaskApp:
                 if self.robot.connected:
                     new_pos = self.robot.robot_conn.getl() # get current pose
                     change = dir_mapping[dir_]
-                    new_pose[change[0]] += change[1]
+                    new_pos[change[0]] += change[1]
+                    print(new_pos)
                     return jsonify({"status": True, "detail": "Move"})
                 else:
-                    return jsonify({"status": False, "detail": "Robot disconnected"})
+                    return abort(400, "Robot disconnected")
             else:
-                return jsonify({"status": False, "detail": "Invalid direction"})
+                return abort(400, "Invalid direction")
             
     
     def gen_img(self, image_type: str):

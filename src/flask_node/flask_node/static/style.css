@@ -1,0 +1,104 @@
+.container {
+    margin-top: 20px;
+}
+
+.cameras-header {
+    margin-bottom: 20px;
+}
+
+.camera-select-image {
+    margin-bottom: 20px;
+    cursor: pointer;
+}
+
+.move-l-send {
+    margin-top: 20px;
+}
+
+.getl-coords {
+    margin-top: 40px;
+    margin-bottom: 40px;
+    table-layout: fixed;
+}
+
+.getl-table-header {
+    margin-top: 40px;
+}
+
+/* body {
+    background-color: #000;
+}
+
+h1,
+h3 {
+    color: #fff
+} */
+
+.joystick {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    background-color: #f2f2f2;
+}
+
+.joystick-middle {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+}
+
+.joystick-up,
+.joystick-down,
+.joystick-left,
+.joystick-right {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    font-size: 16px;
+    font-weight: bold;
+}
+
+.joystick-up {
+    margin-bottom: 10px;
+}
+
+.joystick-down {
+    margin-top: 10px;
+}
+
+.joystick-left {
+    margin-right: 10px;
+}
+
+.joystick-right {
+    margin-left: 10px;
+}
+#movel-btn{
+    margin-bottom: 20px;
+}
+
+@media (max-width: 767px) {
+    .row {
+        flex-direction: column;
+    }
+
+    .col-md-6 {
+        width: 100%;
+    }
+    .camera-view {
+        margin-bottom: 20px;
+    }
+    .z-joystick {
+        margin-top: 20px;
+    }
+    #movel-btn{
+        margin-top: 20px;
+    }
+}
