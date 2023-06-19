@@ -21,7 +21,6 @@ let joystick_move = (dir) => {
     });
 }
 
-
 let robot_system_command = (cmd) => {
     fetch("/api/system", {
         method: "POST",
@@ -32,6 +31,34 @@ let robot_system_command = (cmd) => {
     }).then(function (res) {
         if (res.status !== 200) notify("Error while sending low level command");
         else notify(`Command: ${cmd} executed!`);
+    })
+}
+
+
+let shutdown = () => {
+    Swal.fire({
+        title: 'Do you want to shutdown robot ????',
+        showDenyButton: false,
+        showCancelButton: true,
+        confirmButtonText: 'YES',
+    }).then((result) => {
+        if (result.isConfirmed) {
+            Swal.fire('Shutdowned!', '', 'success');
+            robot_system_command("shutdown");
+        } else if (result.isDenied) {
+            Swal.fire('Changes are not saved', '', 'info')
+        }
+    });
+}
+
+let robot_set_ip = () => {
+    let new_ip = document.getElementById("robot-ip-input").value;
+    fetch("/api/robot/set_ip", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ ip: new_ip })
     })
 }
 
@@ -88,7 +115,6 @@ document.addEventListener('keydown', function (event) {
         case 'ArrowRight':
             joystick_move("y+");
             break;
-
     }
 
 });

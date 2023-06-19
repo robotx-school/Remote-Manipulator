@@ -114,7 +114,7 @@
                             </div>
                             <div class="btn-group-vertical w-20 gap-1" role="group">
                                 <button type="button" class="btn btn-warning btn-lg" id="system-restart-btn" onclick="robot_system_command('power_off')">Power OFF</button>
-                                <button type="button" class="btn btn-danger btn-lg" id="system-stop-btn" onclick="robot_system_command('shutdown')">Shutdown</button>
+                                <button type="button" class="btn btn-danger btn-lg" id="system-stop-btn" onclick="shutdown()">Shutdown</button>
                             </div>
                         </div>
 
@@ -138,11 +138,11 @@
         <div class="set-ip">
             <div class="row">
                 <div class="col-md-10">
-                    <input type="text" class="form-control" placeholder="MoveL 6 raw params" value="192.168.2.172"
-                        id="movel-input-data">
+                    <input type="text" class="form-control" placeholder="Robot ip" value="192.168.2.172"
+                        id="robot-ip-input">
                 </div>
                 <div class="col-md-2">
-                    <button type="submit" class="btn btn-secondary w-100" id="movel-btn">Set IP</button>
+                    <button type="submit" class="btn btn-secondary w-100" id="movel-btn" onclick="robot_set_ip()">Set IP</button>
                 </div>
             </div>
         </div>

@@ -99,6 +99,14 @@ class FlaskApp:
                 return abort(400, "Incorrect system command")
             
             return jsonify({"status": True})
+        
+        @self.app.route("/api/robot/set_ip", methods=['POST'])
+        def api_robot_set_ip():
+            new_ip = request.json["ip"]
+            self.robot.disconnect()
+            self.robot.connect(new_ip)
+            self.robot_low_level.ip = new_ip
+            return jsonify({"status": True, "detail": new_ip})
 
         @self.app.route("/api/joystick", methods=['POST'])
         def joystick_handler():
@@ -146,10 +154,20 @@ class Robot:
         self.connected = False
         self.logger = logger
         self.connect_max_attempts = 5
+        self.ip = None
+        self.connect(ip)
+
+    def disconnect(self):
+        self.connected = False
+        self.ip = None
+        self.robot_conn.close()
+
+    def connect(self, ip: str):
         connect_attempt = 0
         while not self.connected and connect_attempt < self.connect_max_attempts:
             try:
                 self.robot_conn = urx.Robot(ip)
+                self.ip = ip
                 self.connected = True
                 self.logger.info("Connected to robot")
             except Exception as e:
@@ -174,6 +192,7 @@ class RobotLowLevel:
         return self.execute_command(command)[0].replace("Robotmode: ", "")
     
     def power_on(self) -> None:
+        self.close_popup()
         return self.execute_command(self.build_command("power on"))
     
     def power_off(self) -> None:
@@ -183,7 +202,11 @@ class RobotLowLevel:
         return self.execute_command(self.build_command("shutdown"))
     
     def brake_release(self) -> None:
+        self.close_popup()
         return self.execute_command(self.build_command("brake release"))
+    
+    def close_popup(self) -> None:
+        return self.execute_command(self.build_command("close popup"))
 
 def main(args=None):
     state = StateManager()
