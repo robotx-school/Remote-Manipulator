@@ -65,3 +65,24 @@ setInterval(function () {
         }
     });
 }, 2000);
+
+
+document.addEventListener('keydown', function(event) {
+	const key = event.key; // "a", "1", "Shift", etc.
+	switch (key){
+		case 'ArrowUp': 
+			joystick_move("x+");
+			break;
+		case 'ArrowDown':
+			joystick_move("x-");
+			break;
+		case 'ArrowLeft':
+			joystick_move("y-");
+			break;
+		case 'ArrowRight':
+			joystick_move("y+");
+			break;
+
+	}
+    
+});

@@ -35,8 +35,8 @@ class CameraPublisherNode(Node):
         self.timer = self.create_timer(0.03, self.timer_callback)  # 10 fps
         self.bridge = CvBridge()
 
-        self.cap1 = cv2.VideoCapture('/dev/v4l/by-path/platform-fd500000.pcie-pci-0000:01:00.0-usb-0:1.3:1.0-video-index0', )
-        self.cap2 = cv2.VideoCapture('/dev/v4l/by-path/platform-fd500000.pcie-pci-0000:01:00.0-usb-0:1.4:1.0-video-index0', cv2.CAP_V4L2)
+        self.cap1 = cv2.VideoCapture('/dev/v4l/by-path/platform-fd500000.pcie-pci-0000:01:00.0-usb-0:1.1:1.0-video-index0',cv2.CAP_V4L2 )
+        self.cap2 = cv2.VideoCapture('/dev/v4l/by-path/platform-fd500000.pcie-pci-0000:01:00.0-usb-0:1.3:1.0-video-index0', cv2.CAP_V4L2)
 
 
         self.set_camera_properties(self.cap1)

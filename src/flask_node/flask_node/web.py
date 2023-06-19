@@ -72,7 +72,8 @@ class FlaskApp:
         @self.app.route("/api/getl")
         def api_getl():
             if self.robot.connected:
-                return self.robot.robot_conn.getl()
+                curr_l = self.robot.robot_conn.getl()
+                return list(map(lambda x: round(x, 3), curr_l))
             else:
                 return jsonify([-1] * 6) # can't get info
         
@@ -94,10 +95,10 @@ class FlaskApp:
             self.robot.logger.info(f"Direction is: {dir_}")
             offset = 0.05
             dir_mapping = {
-                    "x+": (0, offset),
-                    "x-": (0, -offset),
-                    "y+": (1, offset),
-                    "y-": (1, -offset),
+                    "y-": (0, offset),
+                    "y+": (0, -offset),
+                    "x-": (1, offset),
+                    "x+": (1, -offset),
                     "z+": (2, offset),
                     "z-": (2, -offset)
             }
@@ -106,7 +107,7 @@ class FlaskApp:
                     new_pos = self.robot.robot_conn.getl() # get current pose
                     change = dir_mapping[dir_]
                     new_pos[change[0]] += change[1]
-                    print(new_pos)
+                    self.robot.robot_conn.movel(new_pos, vel=0.2, acc=0.2)
                     return jsonify({"status": True, "detail": "Move"})
                 else:
                     return abort(400, "Robot disconnected")
