@@ -7,6 +7,8 @@ import threading
 import cv2
 import time
 import urx
+from subprocess import PIPE, run
+from typing import List
 
 class CameraSub(Node):
     def __init__(self, state):
@@ -43,10 +45,11 @@ class StateManager:
         self.field_camera_image = None
 
 class FlaskApp:
-    def __init__(self, state, robot) -> None:
+    def __init__(self, state, robot, robot_low_level) -> None:
         self.app = Flask(__name__)
         self.state = state
         self.robot = robot
+        self.robot_low_level = robot_low_level
 
         @self.app.route("/")
         def __index():
@@ -69,25 +72,33 @@ class FlaskApp:
             else:
                 return abort(400, "Robot disconnected")
 
-        @self.app.route("/api/getl")
+        @self.app.route("/api/get_data")
         def api_getl():
+            response = {"getl": [-1] * 6, "mode": "N/A", "ip": "N/A"}
             if self.robot.connected:
                 curr_l = self.robot.robot_conn.getl()
-                return list(map(lambda x: round(x, 3), curr_l))
-            else:
-                return jsonify([-1] * 6) # can't get info
+                curr_l = list(map(lambda x: round(x, 3), curr_l))
+                response["getl"] = curr_l
+                response["mode"] = self.robot_low_level.get_robot_mode()
+                response["ip"] = self.robot_low_level.ip
+
+            return response
         
-        @self.app.route("/api/system/resume")
-        def api_system_resume():
-            pass
-
-        @self.app.route("/api/system/restart")
-        def api_system_restart():
-            pass
-
-        @self.app.route("/api/system/stop")
-        def api_system_stop():
-            pass
+        @self.app.route("/api/system", methods=['POST'])
+        def api_system_commands():
+            command = request.json["command"]
+            if command == "power_on":
+                self.robot_low_level.power_on()
+            elif command == "power_off":
+                self.robot_low_level.power_off()
+            elif command == "shutdown":
+                self.robot_low_level.shutdown()
+            elif command == "brake_release":
+                self.robot_low_level.brake_release()
+            else:
+                return abort(400, "Incorrect system command")
+            
+            return jsonify({"status": True})
 
         @self.app.route("/api/joystick", methods=['POST'])
         def joystick_handler():
@@ -145,12 +156,43 @@ class Robot:
                 connect_attempt += 1
                 self.logger.error(f"Can't connect to robot, attempt ({connect_attempt}/{self.connect_max_attempts}); More info: {e}")
 
+
+class RobotLowLevel:
+    def __init__(self, ip: str) -> None:
+        self.ip = ip
+
+    def build_command(self, command: str) -> str:
+        return f'''echo y | plink root@{self.ip} -pw easybot "{{ echo "{command}"; echo "quit"; }} | nc 127.0.0.1 29999"'''
+
+    def execute_command(self, command: str) -> List[str]:
+        result = run(command, stdout=PIPE, stderr=PIPE, universal_newlines=True, shell=True)
+        result = result.stdout.strip().split("\n")[1:]
+        return result
+    
+    def get_robot_mode(self) -> str:
+        command = self.build_command("robotmode")
+        return self.execute_command(command)[0].replace("Robotmode: ", "")
+    
+    def power_on(self) -> None:
+        return self.execute_command(self.build_command("power on"))
+    
+    def power_off(self) -> None:
+        return self.execute_command(self.build_command("power off"))
+    
+    def shutdown(self) -> None:
+        return self.execute_command(self.build_command("shutdown"))
+    
+    def brake_release(self) -> None:
+        return self.execute_command(self.build_command("brake release"))
+
 def main(args=None):
     state = StateManager()
     rclpy.init(args=args)
     camera_sub = CameraSub(state)
-    robot = Robot("192.168.2.65", camera_sub.get_logger())
-    app = FlaskApp(state, robot)
+    robot_ip_default = "192.168.2.172"
+    robot = Robot(robot_ip_default, camera_sub.get_logger())
+    robot_low_level = RobotLowLevel(robot_ip_default)
+    app = FlaskApp(state, robot, robot_low_level)
     
     threading.Thread(target=lambda: app.app.run(port=8080, host="0.0.0.0")).start()
 
