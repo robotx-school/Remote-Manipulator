@@ -95,6 +95,10 @@ class FlaskApp:
                 self.robot_low_level.shutdown()
             elif command == "brake_release":
                 self.robot_low_level.brake_release()
+            elif command == "close_popup":
+                self.robot_low_level.close_popup()
+            elif command == "show_popup":
+                self.robot_low_level.show_popup("Манипулятор захвачен RobotX")
             else:
                 return abort(400, "Incorrect system command")
             
@@ -207,6 +211,9 @@ class RobotLowLevel:
     
     def close_popup(self) -> None:
         return self.execute_command(self.build_command("close popup"))
+    
+    def show_popup(self, text: str) -> None:
+        return self.execute_command(self.build_command(f"popup {text}"))
 
 def main(args=None):
     state = StateManager()
@@ -215,6 +222,8 @@ def main(args=None):
     robot_ip_default = "192.168.2.172"
     robot = Robot(robot_ip_default, camera_sub.get_logger())
     robot_low_level = RobotLowLevel(robot_ip_default)
+    robot_low_level.close_popup()
+    robot_low_level.show_popup("Манипулятор захвачен RobotX")
     app = FlaskApp(state, robot, robot_low_level)
     
     threading.Thread(target=lambda: app.app.run(port=8080, host="0.0.0.0")).start()
