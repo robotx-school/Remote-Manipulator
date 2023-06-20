@@ -78,7 +78,7 @@ class UrxNode(Node):
             self.control_urx,
             1)
 
-        self.timer = self.create_timer(1, self.publish_urx_data)
+        self.timer = self.create_timer(0.5, self.publish_urx_data)
         self.robot = robot
 
     def publish_urx_data(self):
@@ -121,7 +121,7 @@ class UrxNode(Node):
                 self.get_logger().info(f"Changing robot ip to: {command['ip']}")
 
         else:
-            self.get_logger().warning("Robot disconnected; Can't exexcute command")
+            self.get_logger().warning("Robot disconnected; Can't execute command")
 
 
 

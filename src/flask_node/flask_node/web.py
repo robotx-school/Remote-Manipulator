@@ -120,19 +120,18 @@ class FlaskApp:
         
         @self.app.route("/api/system", methods=['POST'])
         def api_system_commands():
+            if not self.state.urx_status["connected"]:
+                return abort(400, "Robot disconnected")
+            
             command = request.json["command"]
-            if command == "power_on":
-                self.robot_low_level.power_on()
-            elif command == "power_off":
-                self.robot_low_level.power_off()
-            elif command == "shutdown":
-                self.robot_low_level.shutdown()
-            elif command == "brake_release":
-                self.robot_low_level.brake_release()
-            elif command == "close_popup":
-                self.robot_low_level.close_popup()
-            elif command == "show_popup":
-                self.robot_low_level.show_popup("Манипулятор захвачен RobotX")
+            send_data = String()
+            if command in ["power_on", "power_off", "shutdown", "brake_release", "close_popup", "show_popup"]:
+                send_data.data = json.dumps({
+                    "type": "dashboard",
+                    "data": command,
+                    "extra": "Манипулятор захвачен RobotX"
+                })
+                self.urx_command_publish.publish(send_data)
             else:
                 return abort(400, "Incorrect system command")
             
@@ -152,7 +151,7 @@ class FlaskApp:
         @self.app.route("/api/joystick", methods=['POST'])
         def joystick_handler():
             dir_ = request.json["dir"]
-            self.robot.logger.info(f"Direction is: {dir_}")
+            # self.robot.logger.info(f"Direction is: {dir_}")
             offset = 0.05
             dir_mapping = {
                     "y-": (0, offset),
@@ -163,11 +162,17 @@ class FlaskApp:
                     "z-": (2, -offset)
             }
             if dir_ in list(dir_mapping.keys()):
-                if self.robot.connected:
-                    new_pos = self.robot.robot_conn.getl() # get current pose
+                if self.state.urx_status["connected"]:
+                    new_pos = self.state.urx_status["position"] # get current pose
                     change = dir_mapping[dir_]
                     new_pos[change[0]] += change[1]
-                    self.robot.robot_conn.movel(new_pos, vel=0.2, acc=0.2)
+
+                    send_data = String()
+                    send_data.data = json.dumps({
+                        "type": "movel",
+                        "data": new_pos
+                    })
+                    self.urx_command_publish.publish(send_data)
                     return jsonify({"status": True, "detail": "Move"})
                 else:
                     return abort(400, "Robot disconnected")

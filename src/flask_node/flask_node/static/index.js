@@ -29,7 +29,7 @@ let robot_system_command = (cmd) => {
         },
         body: JSON.stringify({ command: cmd })
     }).then(function (res) {
-        if (res.status !== 200) notify("Error while sending low level command");
+        if (res.status !== 200) notify("Error while sending low level command", "error");
         else notify(`Command: ${cmd} executed!`, 'success');
     })
 }
