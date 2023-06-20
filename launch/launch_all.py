@@ -9,10 +9,28 @@ def generate_launch_description():
             executable="camera_node",
             name="camera_node",
         ),
+        # Node(
+        #     package="flask_node",
+        #     namespace="/",
+        #     executable="flask_node",
+        #     name="flask_node",
+        # ),
         Node(
-            package="flask_node",
+            package="urx_node",
             namespace="/",
-            executable="flask_node",
-            name="flask_node",
+            executable="urx_node",
+            name="urx_node",
+        ),
+        Node(
+            package="socket_camera",
+            namespace="/",
+            executable="socket_camera",
+            name="socket_camera",
+        ),
+        Node(
+            package="socket_robot",
+            namespace="/",
+            executable="socket_robot",
+            name="socket_robot",
         )
     ])

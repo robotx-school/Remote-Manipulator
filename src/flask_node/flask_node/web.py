@@ -7,6 +7,7 @@ import threading
 import cv2
 import time
 import urx
+# from urx.robotiq_two_finger_gripper import Robotiq_Two_Finger_Gripper
 from subprocess import PIPE, run
 from typing import List
 
@@ -71,6 +72,10 @@ class FlaskApp:
                 return jsonify({"status": True})
             else:
                 return abort(400, "Robot disconnected")
+            
+        @self.app.route("/api/gripper/set", methods=['POST'])
+        def api_set_gripper():
+            pass
 
         @self.app.route("/api/get_data")
         def api_getl():
@@ -171,6 +176,8 @@ class Robot:
         while not self.connected and connect_attempt < self.connect_max_attempts:
             try:
                 self.robot_conn = urx.Robot(ip)
+                # self.robotiqgrip = Robotiq_Two_Finger_Gripper(self.robot_conn)
+                # self.robotiqgrip.gripper_action(0)
                 self.ip = ip
                 self.connected = True
                 self.logger.info("Connected to robot")
