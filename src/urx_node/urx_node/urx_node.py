@@ -82,7 +82,7 @@ class UrxNode(Node):
         self.robot = robot
 
     def publish_urx_data(self):
-        payload = {"position": [-1] * 6, "mode": "N/A", "ip": "N/A", "connectedd": self.robot.connected}
+        payload = {"position": [-1] * 6, "mode": "N/A", "ip": "N/A", "connected": self.robot.connected}
         if self.robot.connected:
             payload["position"] = self.robot.robot_conn.getl()
             payload["mode"] = self.robot.get_robot_mode()
@@ -115,6 +115,11 @@ class UrxNode(Node):
                     self.robot.close_popup()
                 elif command["type"] == "show_popup":
                     self.robot.show_popup(command["extra"])
+            elif command["type"] == "change_ip":
+                self.robot.disconnect()
+                self.robot.connect(command['ip'])
+                self.get_logger().info(f"Changing robot ip to: {command['ip']}")
+
         else:
             self.get_logger().warning("Robot disconnected; Can't exexcute command")
 
@@ -125,6 +130,8 @@ def main(args=None):
 
     robot = Robot()
     robot.connect("192.168.2.172")
+    robot.close_popup()
+    robot.show_popup("Манипулятор захвачен RobotX")
     
     stats_publisher = UrxNode(robot)
 

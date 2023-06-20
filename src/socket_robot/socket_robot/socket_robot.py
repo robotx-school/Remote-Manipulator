@@ -35,16 +35,11 @@ class SocketServer:
                 elif type(data) == str:
                     self.urx_command_publisher.send_command({"type": "dashboard", "data": data})
 
-
-
-
     def clients_joiner(self):
         while True:
             client_socket, addr = self.server_socket.accept()
             threading.Thread(target=lambda: self.handle_client(client_socket)).start()
 
-
-    
 
 def main(args=None):
     rclpy.init(args=args)

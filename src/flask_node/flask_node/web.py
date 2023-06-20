@@ -2,16 +2,14 @@ import rclpy
 from rclpy.node import Node
 from cv_bridge import CvBridge
 from sensor_msgs.msg import Image
+from std_msgs.msg import String
 from flask import Flask, render_template, Response, request, jsonify, abort
 import threading
 import cv2
 import time
-import urx
-# from urx.robotiq_two_finger_gripper import Robotiq_Two_Finger_Gripper
-from subprocess import PIPE, run
-from typing import List
+import json
 
-class CameraSub(Node):
+class FlakskConnectionNodes(Node):
     def __init__(self, state):
         super().__init__('flask')
         # Init CV and Camera topics readers
@@ -28,29 +26,54 @@ class CameraSub(Node):
             'camera_field',
             self.field_camera_callback,
             1)
+        
+        self.urx_status_subcriber = self.create_subscription(
+            String,
+            'urx_status',
+            self.urx_status_callback,
+            1
+        )
+
+        self.urx_command_publisher = self.create_publisher(
+            String,
+            'urx_command',
+            1
+        )
+
         self.general_camera_sub
         self.field_camera_sub
         self.state = state
         
-        
-
     def general_camera_callback(self, image):
         self.state.general_camera_image = self.br.imgmsg_to_cv2(image)
 
     def field_camera_callback(self, image):
         self.state.field_camera_image = self.br.imgmsg_to_cv2(image)
 
+    def urx_status_callback(self, data):
+        data = json.loads(data.data)
+        self.state.urx_status["position"] = data["position"]
+        self.state.urx_status["mode"] = data["mode"]
+        self.state.urx_status["ip"] = data["ip"]
+        self.state.urx_status["connected"] = data["connected"]
+        # self.get_logger().info(f"{self.state.urx_status}")
+
 class StateManager:
     def __init__(self) -> None:
         self.general_camera_image = None
         self.field_camera_image = None
+        self.urx_status = {
+            "position": [-2] * 6,
+            "mode": "None",
+            "ip": "None",
+            "connected": "None"
+        }
 
 class FlaskApp:
-    def __init__(self, state, robot, robot_low_level) -> None:
+    def __init__(self, state, urx_command_publish) -> None:
         self.app = Flask(__name__)
         self.state = state
-        self.robot = robot
-        self.robot_low_level = robot_low_level
+        self.urx_command_publish = urx_command_publish
 
         @self.app.route("/")
         def __index():
@@ -66,9 +89,15 @@ class FlaskApp:
 
         @self.app.route("/api/movel", methods=['POST'])
         def api_movel():
-            content = eval(request.json["movel"])
-            if self.robot.connected:
-                self.robot.robot_conn.movel(content, acc=0.2, vel=0.2, wait=False)
+            movel = json.loads(request.json["movel"])
+            if self.state.urx_status["connected"]:
+                send_data = String()
+                send_data.data = json.dumps({
+                    "type": "movel",
+                    "data": movel
+                })
+                self.urx_command_publish.publish(send_data)
+                # self.robot.robot_conn.movel(content, acc=0.2, vel=0.2, wait=False)
                 return jsonify({"status": True})
             else:
                 return abort(400, "Robot disconnected")
@@ -80,12 +109,12 @@ class FlaskApp:
         @self.app.route("/api/get_data")
         def api_getl():
             response = {"getl": [-1] * 6, "mode": "N/A", "ip": "N/A"}
-            if self.robot.connected:
-                curr_l = self.robot.robot_conn.getl()
+            if self.state.urx_status["connected"]:
+                curr_l = self.state.urx_status["position"]
                 curr_l = list(map(lambda x: round(x, 3), curr_l))
                 response["getl"] = curr_l
-                response["mode"] = self.robot_low_level.get_robot_mode()
-                response["ip"] = self.robot_low_level.ip
+                response["mode"] = self.state.urx_status["mode"]
+                response["ip"] = self.state.urx_status["ip"]
 
             return response
         
@@ -112,9 +141,12 @@ class FlaskApp:
         @self.app.route("/api/robot/set_ip", methods=['POST'])
         def api_robot_set_ip():
             new_ip = request.json["ip"]
-            self.robot.disconnect()
-            self.robot.connect(new_ip)
-            self.robot_low_level.ip = new_ip
+            send_data = String()
+            send_data.data = json.dumps({
+                "type": "change_ip",
+                "ip": new_ip
+            })
+            self.urx_command_publish.publish(send_data)
             return jsonify({"status": True, "detail": new_ip})
 
         @self.app.route("/api/joystick", methods=['POST'])
@@ -157,81 +189,11 @@ class FlaskApp:
             except cv2.error:
                 print(f"Bad {image_type} image, skipping it")
 
-
-class Robot:
-    def __init__(self, ip: str, logger: object) -> None:
-        self.connected = False
-        self.logger = logger
-        self.connect_max_attempts = 5
-        self.ip = None
-        self.connect(ip)
-
-    def disconnect(self):
-        self.connected = False
-        self.ip = None
-        self.robot_conn.close()
-
-    def connect(self, ip: str):
-        connect_attempt = 0
-        while not self.connected and connect_attempt < self.connect_max_attempts:
-            try:
-                self.robot_conn = urx.Robot(ip)
-                # self.robotiqgrip = Robotiq_Two_Finger_Gripper(self.robot_conn)
-                # self.robotiqgrip.gripper_action(0)
-                self.ip = ip
-                self.connected = True
-                self.logger.info("Connected to robot")
-            except Exception as e:
-                connect_attempt += 1
-                self.logger.error(f"Can't connect to robot, attempt ({connect_attempt}/{self.connect_max_attempts}); More info: {e}")
-
-
-class RobotLowLevel:
-    def __init__(self, ip: str) -> None:
-        self.ip = ip
-
-    def build_command(self, command: str) -> str:
-        return f'''echo y | plink root@{self.ip} -pw easybot "{{ echo "{command}"; echo "quit"; }} | nc 127.0.0.1 29999"'''
-
-    def execute_command(self, command: str) -> List[str]:
-        result = run(command, stdout=PIPE, stderr=PIPE, universal_newlines=True, shell=True)
-        result = result.stdout.strip().split("\n")[1:]
-        return result
-    
-    def get_robot_mode(self) -> str:
-        command = self.build_command("robotmode")
-        return self.execute_command(command)[0].replace("Robotmode: ", "")
-    
-    def power_on(self) -> None:
-        self.close_popup()
-        return self.execute_command(self.build_command("power on"))
-    
-    def power_off(self) -> None:
-        return self.execute_command(self.build_command("power off"))
-    
-    def shutdown(self) -> None:
-        return self.execute_command(self.build_command("shutdown"))
-    
-    def brake_release(self) -> None:
-        self.close_popup()
-        return self.execute_command(self.build_command("brake release"))
-    
-    def close_popup(self) -> None:
-        return self.execute_command(self.build_command("close popup"))
-    
-    def show_popup(self, text: str) -> None:
-        return self.execute_command(self.build_command(f"popup {text}"))
-
 def main(args=None):
     state = StateManager()
     rclpy.init(args=args)
-    camera_sub = CameraSub(state)
-    robot_ip_default = "192.168.2.172"
-    robot = Robot(robot_ip_default, camera_sub.get_logger())
-    robot_low_level = RobotLowLevel(robot_ip_default)
-    robot_low_level.close_popup()
-    robot_low_level.show_popup("Манипулятор захвачен RobotX")
-    app = FlaskApp(state, robot, robot_low_level)
+    camera_sub = FlakskConnectionNodes(state)
+    app = FlaskApp(state, camera_sub.urx_command_publisher)
     
     threading.Thread(target=lambda: app.app.run(port=8080, host="0.0.0.0")).start()
 
