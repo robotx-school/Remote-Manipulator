@@ -1,4 +1,7 @@
 # Remote Manipulator
+
+![0](https://github.com/robotx-school/Remote-Manipulator/assets/55328925/5013d735-d51c-4414-9790-5d360b7c3865)
+
 Set of packages for ROS (tested on Humble distro) to safe and easy remote manipulator(or another robotic) control.
 
 
