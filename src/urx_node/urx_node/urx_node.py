@@ -41,6 +41,7 @@ class Robot:
     def execute_command(self, command: str) -> List[str]:
         result = run(command, stdout=PIPE, stderr=PIPE, universal_newlines=True, shell=True)
         result = result.stdout.strip().split("\n")[1:]
+        print(result)
         return result
     
     def get_robot_mode(self) -> str:
@@ -103,17 +104,17 @@ class UrxNode(Node):
                 self.get_logger().info(f'MoveL to: {command["data"]}')
             elif command["type"] == "dashboard":
                 self.get_logger().info(f'Executing command: {command["data"]}')
-                if command["type"] == "power_on":
+                if command["data"] == "power_on":
                     self.robot.power_on()
-                elif command["type"] == "power_off":
+                elif command["data"] == "power_off":
                     self.robot.power_off()
-                elif command["type"] == "shutdown":
+                elif command["data"] == "shutdown":
                     self.robot.shutdown()
-                elif command["type"] == "brake_release":
+                elif command["data"] == "brake_release":
                     self.robot.brake_release()
-                elif command["type"] == "close_popup":
+                elif command["data"] == "close_popup":
                     self.robot.close_popup()
-                elif command["type"] == "show_popup":
+                elif command["data"] == "show_popup":
                     self.robot.show_popup(command["extra"])
             elif command["type"] == "change_ip":
                 self.robot.disconnect()
@@ -129,7 +130,7 @@ def main(args=None):
     rclpy.init(args=args)
 
     robot = Robot()
-    robot.connect("192.168.2.172")
+    robot.connect("192.168.2.65")
     robot.close_popup()
     robot.show_popup("Манипулятор захвачен RobotX")
     

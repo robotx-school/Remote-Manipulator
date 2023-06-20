@@ -92,7 +92,7 @@ setInterval(function () {
                 for (let i = 0; i < upd_items.length; i++) {
                     document.getElementById(upd_items[i]).innerText = data["getl"][i];
                 }
-                document.getElementById("robot-mode-status").innerHTML = data["mode"];
+                document.getElementById("robot-mode-status").innerHTML = `<b>${data["mode"]}</b>`;
                 document.getElementById("robot-ip-status").innerHTML = data["ip"];
             });
         }
@@ -102,19 +102,23 @@ setInterval(function () {
 
 document.addEventListener('keydown', function (event) {
     const key = event.key; // "a", "1", "Shift", etc.
-    switch (key) {
-        case 'ArrowUp':
-            joystick_move("x+");
-            break;
-        case 'ArrowDown':
-            joystick_move("x-");
-            break;
-        case 'ArrowLeft':
-            joystick_move("y-");
-            break;
-        case 'ArrowRight':
-            joystick_move("y+");
-            break;
+    if (0) {
+        switch (key) {
+            case 'ArrowUp':
+                joystick_move("x+");
+                break;
+            case 'ArrowDown':
+                joystick_move("x-");
+                break;
+            case 'ArrowLeft':
+                joystick_move("y-");
+                break;
+            case 'ArrowRight':
+                joystick_move("y+");
+                break;
+        }
+
     }
+
 
 });
