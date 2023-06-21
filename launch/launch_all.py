@@ -32,5 +32,11 @@ def generate_launch_description():
             namespace="/",
             executable="socket_robot",
             name="socket_robot",
+        ),
+        Node(
+            package="robot_control",
+            namespace="/",
+            executable="robot_control",
+            name="robot_control",
         )
     ])

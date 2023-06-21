@@ -34,9 +34,9 @@ class FlakskConnectionNodes(Node):
             1
         )
 
-        self.urx_command_publisher = self.create_publisher(
+        self.robot_control = self.create_publisher(
             String,
-            'urx_command',
+            'robot_control', # FIXIT; use robot control node here
             1
         )
 
@@ -152,7 +152,7 @@ class FlaskApp:
         def joystick_handler():
             dir_ = request.json["dir"]
             # self.robot.logger.info(f"Direction is: {dir_}")
-            offset = 0.05
+            offset = 0.01
             dir_mapping = {
                     "y-": (0, offset),
                     "y+": (0, -offset),
@@ -198,7 +198,7 @@ def main(args=None):
     state = StateManager()
     rclpy.init(args=args)
     camera_sub = FlakskConnectionNodes(state)
-    app = FlaskApp(state, camera_sub.urx_command_publisher)
+    app = FlaskApp(state, camera_sub.robot_control)
     
     threading.Thread(target=lambda: app.app.run(port=8080, host="0.0.0.0")).start()
 

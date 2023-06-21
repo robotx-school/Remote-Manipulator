@@ -41,7 +41,6 @@ class Robot:
     def execute_command(self, command: str) -> List[str]:
         result = run(command, stdout=PIPE, stderr=PIPE, universal_newlines=True, shell=True)
         result = result.stdout.strip().split("\n")[1:]
-        print(result)
         return result
     
     def get_robot_mode(self) -> str:

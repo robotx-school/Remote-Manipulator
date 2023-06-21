@@ -8,11 +8,11 @@ import threading
 class UrxNodePub(Node):
     def __init__(self):
         super().__init__('socket_robot')
-        self.urx_command_publisher = self.create_publisher(String, 'urx_command', 1)
+        self.urx_command_publisher = self.create_publisher(String, 'robot_control', 1)
 
-    def send_command(self, data: dict):
+    def send_command(self, data: str):
         send_data = String()
-        send_data.data = json.dumps(data)
+        send_data.data = data
         self.urx_command_publisher.publish(send_data)
 
 class SocketServer:
@@ -29,11 +29,7 @@ class SocketServer:
         while True:
             data = client_socket.recv(1024)
             if data:
-                data = json.loads(data)
-                if type(data) == list and len(data) == 6:
-                    self.urx_command_publisher.send_command({"type": "model", "data": data})
-                elif type(data) == str:
-                    self.urx_command_publisher.send_command({"type": "dashboard", "data": data})
+                self.urx_command_publisher.send_command(data.decode("utf-8"))
 
     def clients_joiner(self):
         while True:
