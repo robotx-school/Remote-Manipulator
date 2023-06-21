@@ -88,7 +88,8 @@ class UrxNode(Node):
             payload["mode"] = self.robot.get_robot_mode()
             payload["ip"] = self.robot.ip
         else:
-            self.get_logger().warning('Robot disconnected; No data received')
+            pass
+            # self.get_logger().warning('Robot disconnected; No data received')
         send_data = String()
         send_data.data = json.dumps(payload)
         self.status_publisher.publish(send_data)

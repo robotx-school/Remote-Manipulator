@@ -94,6 +94,7 @@ setInterval(function () {
                 }
                 document.getElementById("robot-mode-status").innerHTML = `<b>${data["mode"]}</b>`;
                 document.getElementById("robot-ip-status").innerHTML = data["ip"];
+                document.getElementById("robot-connected-status").innerHTML = data["connected"];
             });
         }
     });
@@ -117,8 +118,5 @@ document.addEventListener('keydown', function (event) {
                 joystick_move("y+");
                 break;
         }
-
     }
-
-
 });

@@ -100,7 +100,7 @@ class FlaskApp:
                 # self.robot.robot_conn.movel(content, acc=0.2, vel=0.2, wait=False)
                 return jsonify({"status": True})
             else:
-                return abort(400, "Robot disconnected")
+                return abort(401, "Robot disconnected")
             
         @self.app.route("/api/gripper/set", methods=['POST'])
         def api_set_gripper():
@@ -108,7 +108,7 @@ class FlaskApp:
 
         @self.app.route("/api/get_data")
         def api_getl():
-            response = {"getl": [-1] * 6, "mode": "N/A", "ip": "N/A"}
+            response = {"getl": [-1] * 6, "mode": "N/A", "ip": "N/A", "connected": self.state.urx_status["connected"]}
             if self.state.urx_status["connected"]:
                 curr_l = self.state.urx_status["position"]
                 curr_l = list(map(lambda x: round(x, 3), curr_l))
@@ -121,7 +121,7 @@ class FlaskApp:
         @self.app.route("/api/system", methods=['POST'])
         def api_system_commands():
             if not self.state.urx_status["connected"]:
-                return abort(400, "Robot disconnected")
+                return abort(401, "Robot disconnected")
             
             command = request.json["command"]
             send_data = String()
@@ -175,7 +175,7 @@ class FlaskApp:
                     self.urx_command_publish.publish(send_data)
                     return jsonify({"status": True, "detail": "Move"})
                 else:
-                    return abort(400, "Robot disconnected")
+                    return abort(401, "Robot disconnected")
             else:
                 return abort(400, "Invalid direction")
             
