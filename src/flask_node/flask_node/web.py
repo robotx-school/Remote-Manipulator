@@ -9,9 +9,26 @@ import cv2
 import time
 import json
 
-class FlakskConnectionNodes(Node):
+
+class Config:
+    def __init__(self, port: int, host: str, joystick_offset: float) -> None:
+        self.port = port
+        self.host = host
+        self.joystick_offset = joystick_offset
+
+class FlaskConnectionNodes(Node):
     def __init__(self, state):
         super().__init__('flask')
+
+
+        # Declare node params with defaults
+        self.declare_parameter('port', 8080)
+        self.declare_parameter('host', "0.0.0.0")
+        self.declare_parameter('joystick_offset', 0.01)
+
+        self.flask_config = Config(self.get_parameter('port').value, self.get_parameter('host').value, self.get_parameter('joystick_offset').value)
+
+
         # Init CV and Camera topics readers
         self.br = CvBridge()
         self.general_camera_sub = self.create_subscription(
@@ -70,7 +87,7 @@ class StateManager:
         }
 
 class FlaskApp:
-    def __init__(self, state, urx_command_publish) -> None:
+    def __init__(self, state, urx_command_publish, joystick_offset) -> None:
         self.app = Flask(__name__)
         self.state = state
         self.urx_command_publish = urx_command_publish
@@ -152,14 +169,13 @@ class FlaskApp:
         def joystick_handler():
             dir_ = request.json["dir"]
             # self.robot.logger.info(f"Direction is: {dir_}")
-            offset = 0.01
             dir_mapping = {
-                    "y-": (0, offset),
-                    "y+": (0, -offset),
-                    "x-": (1, offset),
-                    "x+": (1, -offset),
-                    "z+": (2, offset),
-                    "z-": (2, -offset)
+                    "y-": (0, joystick_offset),
+                    "y+": (0, -joystick_offset),
+                    "x-": (1, joystick_offset),
+                    "x+": (1, -joystick_offset),
+                    "z+": (2, joystick_offset),
+                    "z-": (2, -joystick_offset)
             }
             if dir_ in list(dir_mapping.keys()):
                 if self.state.urx_status["connected"]:
@@ -197,13 +213,13 @@ class FlaskApp:
 def main(args=None):
     state = StateManager()
     rclpy.init(args=args)
-    camera_sub = FlakskConnectionNodes(state)
-    app = FlaskApp(state, camera_sub.robot_control)
+    flask_topics = FlaskConnectionNodes(state)
+    app = FlaskApp(state, flask_topics.robot_control, flask_topics.flask_config.joystick_offset)
     
-    threading.Thread(target=lambda: app.app.run(port=8080, host="0.0.0.0")).start()
+    threading.Thread(target=lambda: app.app.run(port=flask_topics.flask_config.port, host=flask_topics.flask_config.host)).start()
 
-    rclpy.spin(camera_sub)
-    camera_sub.destroy_node()
+    rclpy.spin(flask_topics)
+    flask_topics.destroy_node()
     rclpy.shutdown()
 
 

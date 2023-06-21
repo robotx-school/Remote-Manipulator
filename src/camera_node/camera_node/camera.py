@@ -31,17 +31,21 @@ class CameraPublisherNode(Node):
     def __init__(self):
         super().__init__('camera_publisher_node')
 
-        # self.declare_parameter('my_str', rclpy.Parameter.Type.STRING) 
-        # self.get_logger().info(f"{self.get_parameter('publish_timer')}")
-        # self.get_logger().info(param_str)
+        # Declare node params with defaults
+        self.declare_parameter('general_camera_path', '/dev/v4l/by-path/platform-fd500000.pcie-pci-0000:01:00.0-usb-0:1.1:1.0-video-index0')
+        self.declare_parameter('field_camera_path', '/dev/v4l/by-path/platform-fd500000.pcie-pci-0000:01:00.0-usb-0:1.3:1.0-video-index0')
+        self.declare_parameter('publish_timer', 0.03)
+        self.declare_parameter('frame_width', 640)
+        self.declare_parameter('frame_height', 480)
+
 
         self.pub1_ = self.create_publisher(Image, 'camera_general', 1)
         self.pub2_ = self.create_publisher(Image, 'camera_field', 1)
-        self.timer = self.create_timer(0.03, self.timer_callback)  # 10 fps
+        self.timer = self.create_timer(self.get_parameter('publish_timer').value, self.timer_callback)  # 10 fps default
         self.bridge = CvBridge()
 
-        self.cap1 = cv2.VideoCapture('/dev/v4l/by-path/platform-fd500000.pcie-pci-0000:01:00.0-usb-0:1.1:1.0-video-index0',cv2.CAP_V4L2 )
-        self.cap2 = cv2.VideoCapture('/dev/v4l/by-path/platform-fd500000.pcie-pci-0000:01:00.0-usb-0:1.3:1.0-video-index0', cv2.CAP_V4L2)
+        self.cap1 = cv2.VideoCapture(self.get_parameter('general_camera_path').value, cv2.CAP_V4L2)
+        self.cap2 = cv2.VideoCapture(self.get_parameter('field_camera_path').value, cv2.CAP_V4L2)
 
 
         self.set_camera_properties(self.cap1)
@@ -54,8 +58,8 @@ class CameraPublisherNode(Node):
         
         
     def set_camera_properties(self, cap):
-        cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
-        cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
+        cap.set(cv2.CAP_PROP_FRAME_WIDTH, self.get_parameter('frame_width').value)
+        cap.set(cv2.CAP_PROP_FRAME_HEIGHT, self.get_parameter('frame_height').value)
         cap.set(cv2.CAP_PROP_FPS, 30)
         
     def add_timestamp(self, img):

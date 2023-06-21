@@ -11,12 +11,13 @@ from urx.robotiq_two_finger_gripper import Robotiq_Two_Finger_Gripper
 
 
 class Robot:
-    def __init__(self) -> None:
+    def __init__(self, gripper_start_pose: int, gripper_step: int) -> None:
         self.connected = False
         self.connect_max_attempts = 3
         self.ip = None
         self.gripper_pose = None
-        self.gripper_step = 10
+        self.gripper_step = gripper_step
+        self.gripper_start_pose = gripper_start_pose
         # self.connect(ip)
 
     def disconnect(self):
@@ -30,8 +31,8 @@ class Robot:
             try:
                 self.robot_conn = urx.Robot(ip)
                 self.robotiqgrip = Robotiq_Two_Finger_Gripper(self.robot_conn)
-                self.robotiqgrip.gripper_action(0) # Set gripper to 0
-                self.gripper_pose = 0
+                self.robotiqgrip.gripper_action(self.gripper_start_pose) # Set gripper to 0
+                self.gripper_pose = self.gripper_start_pose
                 self.ip = ip
                 self.connected = True
                 logging.info("Connected to robot")
@@ -76,6 +77,16 @@ class Robot:
 class UrxNode(Node):
     def __init__(self, robot):
         super().__init__('urx')
+
+
+        # Declare node params with defaults
+        self.declare_parameter('ip', "192.168.2.65")
+        self.declare_parameter('popup_message', "Манипулятор захвачен RobotX")
+        self.declare_parameter('status_publish_rate', 0.5)
+        self.declare_parameter('gripper_start_pose', 0)
+        self.declare_parameter('gripper_step', 10)
+        
+
         self.status_publisher = self.create_publisher(String, 'urx_status', 1)
         self.command_subscriber = self.create_subscription(
             String,
@@ -83,7 +94,7 @@ class UrxNode(Node):
             self.control_urx,
             1)
 
-        self.timer = self.create_timer(0.5, self.publish_urx_data)
+        self.timer = self.create_timer(self.get_parameter("status_publish_rate"), self.publish_urx_data)
         self.robot = robot
 
     def publish_urx_data(self):
@@ -105,12 +116,8 @@ class UrxNode(Node):
             command = json.loads(data.data)
             self.get_logger().info(f"{command}")
             if command["type"] == "movel":
-                self.robot.robot_conn.movel(command["data"], vel=0.15, acc=0.15)
+                self.robot.robot_conn.movel(command["data"], vel=command["velocity"], acc=command["acceleration"])
                 self.get_logger().info(f'MoveL to: {command["data"]}')
-            elif command["type"] == "gripper_plus":
-                pass
-            elif command["type"] == "gripper_minus":
-                pass
             elif command["type"] == "dashboard":
                 self.get_logger().info(f'Executing command: {command["data"]}')
                 if command["data"] == "power_on":
@@ -125,6 +132,10 @@ class UrxNode(Node):
                     self.robot.close_popup()
                 elif command["data"] == "show_popup":
                     self.robot.show_popup(command["extra"])
+
+            elif command["type"] == "gripper":
+                self.robot.robotiqgrip.gripper_action(command["data"])
+            
             elif command["type"] == "change_ip":
                 self.robot.disconnect()
                 self.robot.connect(command['ip'])
@@ -138,16 +149,16 @@ class UrxNode(Node):
 def main(args=None):
     rclpy.init(args=args)
 
-    robot = Robot()
-    robot.connect("192.168.2.65")
-    robot.close_popup()
-    robot.show_popup("Манипулятор захвачен RobotX")
     
-    stats_publisher = UrxNode(robot)
+    urx_node = UrxNode(robot)
+    robot = Robot(urx_node.get_parameter("gripper_start_pose"), urx_node.get_parameter("gripper_step"))
+    robot.connect(urx_node.get_parameter("ip"))
+    robot.close_popup()
+    robot.show_popup(urx_node.get_parameter("popup_message"))
 
-    rclpy.spin(stats_publisher)
+    rclpy.spin(urx_node)
 
-    stats_publisher.destroy_node()
+    urx_node.destroy_node()
     rclpy.shutdown()
 
 

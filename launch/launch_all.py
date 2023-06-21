@@ -5,17 +5,18 @@ from ament_index_python.packages import get_package_share_directory
 from launch_ros.actions import Node
 
 def generate_launch_description():
-    # config = os.path.join(
-    #   "./",
-    #   'config',
-    #   'params.yaml'
-    # )
+    config = os.path.join(
+      "./",
+      'config',
+      'params.yaml'
+    )
     return LaunchDescription([
         Node(
             package="camera_node",
             namespace="/",
             executable="camera_node",
             name="camera_node",
+            parameters=[config]
         ),
         Node(
             package="urx_node",
