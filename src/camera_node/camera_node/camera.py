@@ -30,6 +30,11 @@ class CameraReader:
 class CameraPublisherNode(Node):
     def __init__(self):
         super().__init__('camera_publisher_node')
+
+        # self.declare_parameter('my_str', rclpy.Parameter.Type.STRING) 
+        # self.get_logger().info(f"{self.get_parameter('publish_timer')}")
+        # self.get_logger().info(param_str)
+
         self.pub1_ = self.create_publisher(Image, 'camera_general', 1)
         self.pub2_ = self.create_publisher(Image, 'camera_field', 1)
         self.timer = self.create_timer(0.03, self.timer_callback)  # 10 fps
@@ -45,6 +50,8 @@ class CameraPublisherNode(Node):
         self.reader2 = CameraReader(self.cap2)
         self.reader1.start_reading()
         self.reader2.start_reading()
+
+        
         
     def set_camera_properties(self, cap):
         cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)

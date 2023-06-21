@@ -26,10 +26,14 @@ class SocketServer:
         self.server_socket.listen(5)
     
     def handle_client(self, client_socket):
-        while True:
-            data = client_socket.recv(1024)
-            if data:
-                self.urx_command_publisher.send_command(data.decode("utf-8"))
+        
+            while True:
+                try:
+                    data = client_socket.recv(1024)
+                    if data:
+                        self.urx_command_publisher.send_command(data.decode("utf-8"))
+                except ConnectionResetError:
+                    break
 
     def clients_joiner(self):
         while True:

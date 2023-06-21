@@ -6,6 +6,8 @@ from typing import List
 import urx
 from subprocess import PIPE, run
 import logging
+from urx.robotiq_two_finger_gripper import Robotiq_Two_Finger_Gripper
+
 
 
 class Robot:
@@ -13,6 +15,8 @@ class Robot:
         self.connected = False
         self.connect_max_attempts = 3
         self.ip = None
+        self.gripper_pose = None
+        self.gripper_step = 10
         # self.connect(ip)
 
     def disconnect(self):
@@ -25,8 +29,9 @@ class Robot:
         while not self.connected and connect_attempt < self.connect_max_attempts:
             try:
                 self.robot_conn = urx.Robot(ip)
-                # self.robotiqgrip = Robotiq_Two_Finger_Gripper(self.robot_conn)
-                # self.robotiqgrip.gripper_action(0)
+                self.robotiqgrip = Robotiq_Two_Finger_Gripper(self.robot_conn)
+                self.robotiqgrip.gripper_action(0) # Set gripper to 0
+                self.gripper_pose = 0
                 self.ip = ip
                 self.connected = True
                 logging.info("Connected to robot")
@@ -102,6 +107,10 @@ class UrxNode(Node):
             if command["type"] == "movel":
                 self.robot.robot_conn.movel(command["data"], vel=0.15, acc=0.15)
                 self.get_logger().info(f'MoveL to: {command["data"]}')
+            elif command["type"] == "gripper_plus":
+                pass
+            elif command["type"] == "gripper_minus":
+                pass
             elif command["type"] == "dashboard":
                 self.get_logger().info(f'Executing command: {command["data"]}')
                 if command["data"] == "power_on":

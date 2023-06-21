@@ -21,6 +21,10 @@ let joystick_move = (dir) => {
     });
 }
 
+let gripper_plus = () => {}
+
+let gripper_minus = () => {}
+
 let robot_system_command = (cmd) => {
     fetch("/api/system", {
         method: "POST",
