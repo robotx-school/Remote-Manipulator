@@ -21,17 +21,37 @@ let joystick_move = (dir) => {
     });
 }
 
-let gripper_plus = () => {}
+let gripper = (pose) => {
+    if (0 <= pose <= 255) {
+        fetch("/api/gripper", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ pose: pose })
+        }).then(function (res) {
+            if (res.status !== 200) notify("Gripper error");
+        })
+    }
+}
 
-let gripper_minus = () => {}
+let gripper_minus = () => {
+    let pose = parseInt(document.getElementById("gripper-percent").innerText);
+    gripper(pose - 40);
+}
 
-let robot_system_command = (cmd) => {
+let gripper_plus = () => {
+    let pose = parseInt(document.getElementById("gripper-percent").innerText);
+    gripper(pose + 40);
+}
+
+let robot_system_command = (cmd, extra="") => {
     fetch("/api/system", {
         method: "POST",
         headers: {
             "Content-Type": "application/json"
         },
-        body: JSON.stringify({ command: cmd })
+        body: JSON.stringify({ command: cmd, extra: extra })
     }).then(function (res) {
         if (res.status !== 200) notify("Error while sending low level command", "error");
         else notify(`Command: ${cmd} executed!`, 'success');
@@ -99,10 +119,11 @@ setInterval(function () {
                 document.getElementById("robot-mode-status").innerHTML = `<b>${data["mode"]}</b>`;
                 document.getElementById("robot-ip-status").innerHTML = data["ip"];
                 document.getElementById("robot-connected-status").innerHTML = data["connected"];
+                document.getElementById("gripper-percent").innerHTML = data["gripper"];
             });
         }
     });
-}, 2000);
+}, 1000);
 
 
 document.addEventListener('keydown', function (event) {

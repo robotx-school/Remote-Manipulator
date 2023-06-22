@@ -88,15 +88,15 @@
                             <h3>X, Y</h3>
                             <div class="btn-group-vertical w-100" role="group">
                                 <button type="button" class="btn btn-secondary btn-lg"
-                                    onclick="joystick_move('x+')"><span class="bi-caret-up-fill"></span></button>
+                                    onclick="joystick_move('y-')"><span class="bi-caret-up-fill"></span></button>
                                 <div class="btn-group" role="group">
                                     <button type="button" class="btn btn-secondary btn-lg"
-                                        onclick="joystick_move('y-')"><span class="bi-caret-left-fill"></span></button>
+                                        onclick="joystick_move('x-')"><span class="bi-caret-left-fill"></span></button>
                                     <button type="button" class="btn btn-secondary btn-lg"
-                                        onclick="joystick_move('y+')"><span class="bi-caret-right-fill"></span></button>
+                                        onclick="joystick_move('x+')"><span class="bi-caret-right-fill"></span></button>
                                 </div>
                                 <button type="button" class="btn btn-secondary btn-lg"
-                                    onclick="joystick_move('x-')"><span class="bi-caret-down-fill"></span></button>
+                                    onclick="joystick_move('y+')"><span class="bi-caret-down-fill"></span></button>
                             </div>
                         </div>
                         <div class="col-md-4 z-joystick">
@@ -112,10 +112,10 @@
                         <div class="col-md-4 gripper-joystick">
                             <h3>Gripper: <span id="gripper-percent">N/A</span></h3>
                             <div class="btn-group-horizontal w-30" role="group">
-                                <button type="button" class="btn btn-primary btn-lg" onclick="gripper_plus()"><span
-                                        class="bi bi-plus-square-fill"></span></button>
                                 <button type="button" class="btn btn-primary btn-lg" onclick="gripper_minus()"><span
                                         class="bi bi-dash-square-fill"></span></button>
+                                <button type="button" class="btn btn-primary btn-lg" onclick="gripper_plus()"><span
+                                        class="bi bi-plus-square-fill"></span></button>
                             </div>
                         </div>
                     </div>
@@ -158,18 +158,35 @@
             </div>
         </div>
 
-        <div class="set-ip">
+        <div class="inp-send-block">
             <div class="row">
                 <div class="col-md-10">
                     <input type="text" class="form-control" placeholder="Robot ip" value="192.168.2.172"
                         id="robot-ip-input">
                 </div>
                 <div class="col-md-2">
-                    <button type="submit" class="btn btn-secondary w-100" id="movel-btn" onclick="robot_set_ip()">Set
+                    <button type="submit" class="btn btn-secondary w-100" onclick="robot_set_ip()">Set
                         IP</button>
                 </div>
             </div>
         </div>
+
+        <div class="inp-send-block">
+            <div class="row">
+                <div class="col-md-10">
+                    <input type="text" class="form-control" placeholder="Message text" value="Test message"
+                        id="message-popup-input">
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-secondary w-100" id="movel-btn"
+                        onclick="robot_system_command('show_popup', document.getElementById('message-popup-input').value)">Show message</button>
+                </div>
+            </div>
+        </div>
+
+
+
+
     </div>
 
 

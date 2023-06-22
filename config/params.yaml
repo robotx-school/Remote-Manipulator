@@ -14,8 +14,8 @@
 
 /urx_node:
   ros__parameters:
-    ip: "192.168.2.172"
-    popup_message: "Манипулятор захвачен RobotX (manipulator occupied by RobotX)"
+    ip: "192.168.2.65"
+    popup_message: "Манипулятор захвачен RobotX\nManipulator occupied by RobotX"
     status_publish_rate: 0.5 # second
     gripper_start_pose: 0 # 0 - 255
     gripper_step: 10 # 0 - 255
@@ -27,14 +27,14 @@
       max: 100
       min: 0
     movel: # meters
-      x_min: -0.25
-      x_max: 0.25
+      x_min: -0.22
+      x_max: 0.22
 
-      y_min: -0.150
-      y_max: -0.5
+      y_max: -0.150
+      y_min: -0.5
 
-      z_min: 0.01
-      z_max: 0.2
+      z_min: 0.17
+      z_max: 0.35
 
       velocity: 0.15
       acceleration: 0.15

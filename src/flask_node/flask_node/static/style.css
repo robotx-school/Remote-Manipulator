@@ -84,8 +84,8 @@ h3 {
     margin-bottom: 20px;
 }
 
-.set-ip {
-    margin-top: 20px;
+.inp-send-block {
+    margin-top: 10px;
 }
 
 @media (max-width: 767px) {

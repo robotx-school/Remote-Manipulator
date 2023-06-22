@@ -73,6 +73,7 @@ class FlaskConnectionNodes(Node):
         self.state.urx_status["mode"] = data["mode"]
         self.state.urx_status["ip"] = data["ip"]
         self.state.urx_status["connected"] = data["connected"]
+        self.state.urx_status["gripper"] = data["gripper"]
         # self.get_logger().info(f"{self.state.urx_status}")
 
 class StateManager:
@@ -83,7 +84,8 @@ class StateManager:
             "position": [-2] * 6,
             "mode": "None",
             "ip": "None",
-            "connected": "None"
+            "connected": "None",
+            "gripper": -2
         }
 
 class FlaskApp:
@@ -118,20 +120,34 @@ class FlaskApp:
                 return jsonify({"status": True})
             else:
                 return abort(401, "Robot disconnected")
-            
+        @self.app.route("/api/gripper", methods=['POST'])
+        def api_gripper():
+            pose = request.json["pose"]
+            if self.state.urx_status["connected"]:
+                send_data = String()
+                send_data.data = json.dumps({
+                    "type": "gripper",
+                    "data": pose
+                })
+                self.urx_command_publish.publish(send_data)
+                return jsonify({"status": True})
+            else:
+                return abort(401, "Robot disconnected")
+
         @self.app.route("/api/gripper/set", methods=['POST'])
         def api_set_gripper():
             pass
 
         @self.app.route("/api/get_data")
         def api_getl():
-            response = {"getl": [-1] * 6, "mode": "N/A", "ip": "N/A", "connected": self.state.urx_status["connected"]}
+            response = {"getl": [-1] * 6, "gripper": "N/A", "mode": "N/A", "ip": "N/A", "connected": self.state.urx_status["connected"]}
             if self.state.urx_status["connected"]:
                 curr_l = self.state.urx_status["position"]
                 curr_l = list(map(lambda x: round(x, 3), curr_l))
                 response["getl"] = curr_l
                 response["mode"] = self.state.urx_status["mode"]
                 response["ip"] = self.state.urx_status["ip"]
+                response["gripper"] = self.state.urx_status["gripper"]
 
             return response
         
@@ -140,13 +156,15 @@ class FlaskApp:
             if not self.state.urx_status["connected"]:
                 return abort(401, "Robot disconnected")
             
-            command = request.json["command"]
+            dt = request.json
+            command = dt["command"]
+            extra = dt["extra"] if "extra" in dt else ""
             send_data = String()
             if command in ["power_on", "power_off", "shutdown", "brake_release", "close_popup", "show_popup"]:
                 send_data.data = json.dumps({
                     "type": "dashboard",
                     "data": command,
-                    "extra": "Манипулятор захвачен RobotX"
+                    "extra": extra
                 })
                 self.urx_command_publish.publish(send_data)
             else:

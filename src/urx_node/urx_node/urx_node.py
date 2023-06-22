@@ -45,8 +45,11 @@ class Robot:
         return f'''echo y | plink root@{self.ip} -pw easybot "{{ echo "{command}"; echo "quit"; }} | nc 127.0.0.1 29999"'''
 
     def execute_command(self, command: str) -> List[str]:
+        #logging.error(f"{command}")
         result = run(command, stdout=PIPE, stderr=PIPE, universal_newlines=True, shell=True)
+        #logging.error(f"{result.stdout}")
         result = result.stdout.strip().split("\n")[1:]
+        
         return result
     
     def get_robot_mode(self) -> str:
@@ -98,11 +101,12 @@ class UrxNode(Node):
         self.robot = None
 
     def publish_urx_data(self):
-        payload = {"position": [-1] * 6, "mode": "N/A", "ip": "N/A", "connected": self.robot.connected}
+        payload = {"position": [-1] * 6, "gripper": "N/A", "mode": "N/A", "ip": "N/A", "connected": self.robot.connected}
         if self.robot.connected:
             payload["position"] = self.robot.robot_conn.getl()
             payload["mode"] = self.robot.get_robot_mode()
             payload["ip"] = self.robot.ip
+            payload["gripper"] = self.robot.gripper_pose
         else:
             pass
             # self.get_logger().warning('Robot disconnected; No data received')
@@ -135,6 +139,7 @@ class UrxNode(Node):
                     self.robot.show_popup(command["extra"])
 
             elif command["type"] == "gripper":
+                self.robot.gripper_pose = command["data"]
                 self.robot.robotiqgrip.gripper_action(command["data"])
             
             elif command["type"] == "change_ip":
@@ -154,6 +159,7 @@ def main(args=None):
     urx_node = UrxNode()
     robot = Robot(urx_node.get_parameter("gripper_start_pose").value, urx_node.get_parameter("gripper_step").value)
     robot.connect(urx_node.get_parameter("ip").value)
+    
     robot.close_popup()
     robot.show_popup(urx_node.get_parameter("popup_message").value)
     urx_node.robot = robot
