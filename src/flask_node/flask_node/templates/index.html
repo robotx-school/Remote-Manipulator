@@ -109,7 +109,7 @@
                             </div>
                         </div>
 
-                        <div class="col-md-4 gripper-joystick">
+                        <div class="col-md-4 gripper-joystick mt-3">
                             <h3>Gripper: <span id="gripper-percent">N/A</span></h3>
                             <div class="btn-group-horizontal w-30" role="group">
                                 <button type="button" class="btn btn-primary btn-lg" onclick="gripper_minus()"><span
@@ -179,14 +179,28 @@
                 </div>
                 <div class="col-md-2">
                     <button type="submit" class="btn btn-secondary w-100" id="movel-btn"
-                        onclick="robot_system_command('show_popup', document.getElementById('message-popup-input').value)">Show message</button>
+                        onclick="robot_system_command('show_popup', document.getElementById('message-popup-input').value)">Show
+                        message</button>
                 </div>
             </div>
         </div>
 
+    </div>
 
-
-
+    <div class="container my-5">
+        <footer class="text-center text-white">
+            <div class="container pt-4">
+                <section>
+                    <a class="btn btn-link btn-floating btn-lg text-dark m-1"
+                        target="__blank"
+                        href="https://github.com/robotx-school/Remote-Manipulator" role="button"
+                        data-mdb-ripple-color="dark"><i class="bi bi-github"></i></a>
+                </section>
+            </div>
+            <div class="text-center text-dark p-1">
+                RobotX Remote Manipulator
+            </div>
+        </footer>
     </div>
 
 

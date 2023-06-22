@@ -128,19 +128,30 @@ setInterval(function () {
 
 document.addEventListener('keydown', function (event) {
     const key = event.key; // "a", "1", "Shift", etc.
+    console.log(key);
     if (0) {
         switch (key) {
-            case 'ArrowUp':
-                joystick_move("x+");
-                break;
-            case 'ArrowDown':
+            case 'р':
+            case 'h':
                 joystick_move("x-");
                 break;
-            case 'ArrowLeft':
+            case 'д':
+            case 'l':
+                joystick_move("x+");
+                break;
+            case 'л':
+            case 'k':
                 joystick_move("y-");
                 break;
-            case 'ArrowRight':
+            case 'o':
+            case 'j':
                 joystick_move("y+");
+                break;
+            case 'ArrowUp':
+                joystick_move("z+");
+                break;
+            case 'ArrowDown':
+                joystick_move("z+");
                 break;
         }
     }
