@@ -75,7 +75,7 @@ class Robot:
 
 
 class UrxNode(Node):
-    def __init__(self, robot):
+    def __init__(self):
         super().__init__('urx')
 
 
@@ -94,8 +94,8 @@ class UrxNode(Node):
             self.control_urx,
             1)
 
-        self.timer = self.create_timer(self.get_parameter("status_publish_rate"), self.publish_urx_data)
-        self.robot = robot
+        self.timer = self.create_timer(self.get_parameter("status_publish_rate").value, self.publish_urx_data)
+        self.robot = None
 
     def publish_urx_data(self):
         payload = {"position": [-1] * 6, "mode": "N/A", "ip": "N/A", "connected": self.robot.connected}
@@ -119,7 +119,8 @@ class UrxNode(Node):
                 self.robot.robot_conn.movel(command["data"], vel=command["velocity"], acc=command["acceleration"])
                 self.get_logger().info(f'MoveL to: {command["data"]}')
             elif command["type"] == "dashboard":
-                self.get_logger().info(f'Executing command: {command["data"]}')
+
+                self.get_logger().info(f'Executing command: {command["data"]} {command}')
                 if command["data"] == "power_on":
                     self.robot.power_on()
                 elif command["data"] == "power_off":
@@ -150,11 +151,12 @@ def main(args=None):
     rclpy.init(args=args)
 
     
-    urx_node = UrxNode(robot)
-    robot = Robot(urx_node.get_parameter("gripper_start_pose"), urx_node.get_parameter("gripper_step"))
-    robot.connect(urx_node.get_parameter("ip"))
+    urx_node = UrxNode()
+    robot = Robot(urx_node.get_parameter("gripper_start_pose").value, urx_node.get_parameter("gripper_step").value)
+    robot.connect(urx_node.get_parameter("ip").value)
     robot.close_popup()
-    robot.show_popup(urx_node.get_parameter("popup_message"))
+    robot.show_popup(urx_node.get_parameter("popup_message").value)
+    urx_node.robot = robot
 
     rclpy.spin(urx_node)
 

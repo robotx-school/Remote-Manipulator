@@ -23,6 +23,7 @@ def generate_launch_description():
             namespace="/",
             executable="urx_node",
             name="urx_node",
+            parameters=[config]
             
         ),
         Node(
@@ -30,6 +31,7 @@ def generate_launch_description():
             namespace="/",
             executable="flask_node",
             name="flask_node",
+            parameters=[config]
             
         ),
         Node(
@@ -37,6 +39,7 @@ def generate_launch_description():
             namespace="/",
             executable="socket_camera",
             name="socket_camera",
+            parameters=[config]
             
         ),
         Node(
@@ -44,6 +47,7 @@ def generate_launch_description():
             namespace="/",
             executable="socket_robot",
             name="socket_robot",
+            parameters=[config]
             
         ),
         Node(
@@ -51,5 +55,6 @@ def generate_launch_description():
             namespace="/",
             executable="robot_control",
             name="robot_control",
+            parameters=[config]
         )
     ])

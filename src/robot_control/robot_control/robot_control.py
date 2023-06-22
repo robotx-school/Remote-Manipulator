@@ -44,7 +44,9 @@ class RobotControlNode(Node):
                     # Check limits here
                     self.send_command({"type": "model", "data": data["data"], "velocity": self.get_parameter("velocity").value, "acceleration": self.get_parameter("acceleration").value})
                 elif data["type"] == "dashboard": # dashboard command
-                    self.send_command({"type": "dashboard", "data": data["data"]})
+                    self.send_command({"type": "dashboard", "data": data["data"], "extra": data["extra"] if "extra" in data else ""})
+                elif data["type"] == "gripper":
+                    self.send_command({"type": "gripper", "data": data["data"]})
         except json.decoder.JSONDecodeError:
             pass
 
