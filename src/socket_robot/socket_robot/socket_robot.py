@@ -54,6 +54,15 @@ class SocketServer:
                             }))
                         elif data["type"] == "getl":
                             client_socket.sendall(json.dumps({"pose": self.state.pose}).encode("utf-8"))
+                        
+                        elif data["type"] == "gripper_pose":
+                            client_socket.sendall(json.dumps({"pose": self.state.gripper}).encode("utf-8"))
+
+                        elif data["type"] == "gripper_action":
+                            self.robot_control_pub.send_command(json.dumps({
+                                "type": "gripper",
+                                "data": data["pose"]
+                            }))
                     except json.decoder.JSONDecodeError:
                         pass
                     
