@@ -15,7 +15,7 @@ class GeneralCameraSub(Node):
         
         self.general_camera_sub = self.create_subscription(
             Image,
-            'camera_general',
+            'camera_field',
             self.general_camera_callback,
             1)
         self.state = state
