@@ -6,10 +6,13 @@ from std_msgs.msg import String
 from flask import Flask, render_template, Response, request, jsonify, abort
 import threading
 import cv2
+import logging
+
 import time
 import json
 
-
+log = logging.getLogger('werkzeug')
+log.disabled = True
 class Config:
     def __init__(self, port: int, host: str, joystick_offset: float) -> None:
         self.port = port

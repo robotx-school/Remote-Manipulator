@@ -6,7 +6,10 @@ from typing import List
 import urx
 from subprocess import PIPE, run
 import logging
-from urx.robotiq_two_finger_gripper import Robotiq_Two_Finger_Gripper
+import threading
+import time
+
+#from urx.robotiq_two_finger_gripper import Robotiq_Two_Finger_Gripper
 
 
 
@@ -30,8 +33,8 @@ class Robot:
         while not self.connected and connect_attempt < self.connect_max_attempts:
             try:
                 self.robot_conn = urx.Robot(ip)
-                self.robotiqgrip = Robotiq_Two_Finger_Gripper(self.robot_conn)
-                self.robotiqgrip.gripper_action(self.gripper_start_pose) # Set gripper to 0
+                #self.robotiqgrip = Robotiq_Two_Finger_Gripper(self.robot_conn)
+                #self.robotiqgrip.gripper_action(self.gripper_start_pose) # Set gripper to 0
                 self.gripper_pose = self.gripper_start_pose
                 self.ip = ip
                 self.connected = True
@@ -49,7 +52,7 @@ class Robot:
         result = run(command, stdout=PIPE, stderr=PIPE, universal_newlines=True, shell=True)
         #logging.error(f"{result.stdout}")
         result = result.stdout.strip().split("\n")[1:]
-        
+        #logging.error(f"{result}")
         return result
     
     def get_robot_mode(self) -> str:
@@ -97,31 +100,46 @@ class UrxNode(Node):
             self.control_urx,
             1)
 
-        self.timer = self.create_timer(self.get_parameter("status_publish_rate").value, self.publish_urx_data)
+        #self.timer = self.create_timer(5, self.publish_urx_data)
         self.robot = None
+        publish_thread = threading.Thread(target=self.publish_urx_data)
+        publish_thread.start()
 
     def publish_urx_data(self):
-        payload = {"position": [-1] * 6, "gripper": "N/A", "mode": "N/A", "ip": "N/A", "connected": self.robot.connected}
-        if self.robot.connected:
-            payload["position"] = self.robot.robot_conn.getl()
-            payload["mode"] = self.robot.get_robot_mode()
-            payload["ip"] = self.robot.ip
-            payload["gripper"] = self.robot.gripper_pose
-        else:
-            pass
-            # self.get_logger().warning('Robot disconnected; No data received')
-        send_data = String()
-        send_data.data = json.dumps(payload)
-        self.status_publisher.publish(send_data)
-        
+        self.get_logger().info("Publish thread started")
+        while True:
+            if self.robot:
+                payload = {"position": [-1] * 6, "gripper": "N/A", "mode": "N/A", "ip": "N/A", "connected": self.robot.connected}
+                if self.robot.connected:
+                    payload["position"] = self.robot.robot_conn.getl()
+                    payload["mode"] = self.robot.get_robot_mode()
+                    payload["ip"] = self.robot.ip
+                    payload["gripper"] = self.robot.gripper_pose
+                else:
+                    payload["position"] = [-1, -1, -1, -1, -1, -1]
+                    payload["mode"] = "NO DATA"
+                    payload["ip"] = self.robot.ip
+                    payload["gripper"] = 0
+                    # self.get_logger().warning('Robot disconnected; No data received')
+                send_data = String()
+                send_data.data = json.dumps(payload)
+                self.status_publisher.publish(send_data)
+                time.sleep(0.5)
+                
 
     def control_urx(self, data):
+        #self.get_logger().info("Callback")
         if self.robot.connected:
+            #self.get_logger().info("Checked connected")
             command = json.loads(data.data)
-            self.get_logger().info(f"{command}")
+            #self.get_logger().info(f"{command} dumped")
             if command["type"] == "movel":
-                self.robot.robot_conn.movel(command["data"], vel=command["velocity"], acc=command["acceleration"])
-                self.get_logger().info(f'MoveL to: {command["data"]}')
+                try:
+                    self.robot.robot_conn.movel(command["data"], vel=command["velocity"], acc=command["acceleration"])
+                    self.get_logger().info("movel sent")
+                except Exception as e:
+                    self.get_logger().error(f"Error while movel: {e}")
+                #self.get_logger().info(f'MoveL to: {command["data"]}')
             elif command["type"] == "dashboard":
 
                 self.get_logger().info(f'Executing command: {command["data"]} {command}')
