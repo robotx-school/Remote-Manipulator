@@ -49,7 +49,7 @@ class CameraClient:
 
 
 if __name__ == "__main__":
-    camera = CameraClient("localhost", 9988)
+    camera = CameraClient("172.44.44.70", 9988)
     while True:
         frame = camera.get_frame()
         print(frame.shape)

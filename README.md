@@ -1,35 +1,35 @@
-# Remote Manipulator
+# Система удалённого управления манипулятором
+[🇷🇺 RUSSIAN](README.md)
+[🇬🇧 ENGLISH](README.EN.md)
 
-![0](https://github.com/robotx-school/Remote-Manipulator/assets/55328925/5013d735-d51c-4414-9790-5d360b7c3865)
+![2024-01-23-211454_hyprshot](https://github.com/robotx-school/Remote-Manipulator/assets/55328925/6466a09f-4f2c-40e0-974b-d5a06af8dd7f)
 
-Set of packages for ROS (tested on Humble distro) to safe and easy remote manipulator(or another robotic) control.
+Система для безопасного управления удалённым манипулятором (без физического доступа к нему).
 
+## Запуск
+Если у вас уже установлен ROS2 Humble, если нет рекомендуем ознакомиться с этой [статьёй](https://habr.com/ru/articles/768048/) или [офф.документацией](https://docs.ros.org/en/humble/Installation/Ubuntu-Install-Debians.html). Установить достаточно минимальную версию и инструменты разработки(`ros-humble-ros-base`, `ros-dev-tools`). Обязательно установите пакет `ros-humble-cv-bridge`.
 
-## Docker run
-Build container:
+### Подготовка
 ```bash
-docker build -t ros2 .
+source /opt/ros/humble/setup.bash # Опционально
+cd ~/some_ws/
+git clone https://github.com/robotx-school/Remote-Manipulator
 ```
 
-Run container with one camera shared from host and source from this folder mounted to `/root/ros2_ws` in container:
+### Сборка всех пакетов проекта:
 ```bash
-docker run -v ./:/root/ros2_ws --device=/dev/video0:/dev/video0 -it ros2
+colcon build .
+source install/local_setup.bash
 ```
 
-And if you want to run X11 apps inside docker (like `rqt_graph`) use next command to run container:
+### Запуск
 ```bash
-docker run -v ./:/root/ros2_ws --device=/dev/video0:/dev/video0 -it --volume="/tmp/.X11-unix:/tmp/.X11-unix:rw" --env="DISPLAY" --env="QT_X11_NO_MITSHM=1" ros2
+ros2 launch Remote-Manipulator/launch/launch_all.py
 ```
 
-docker id: 968
-sudo chown -R :<docker_group_id> <shared_folder_path>
-sudo chmod -R g+w <shared_folder_path>
+## Настройка
+TODO
 
-
-Run cmd:
-docker run -v /home/stephan/Progs/RemoteManip:/root/ros2_ws --device=/dev/video0:/dev/video0 -it ros2
-
-
-/usr/local/lib/python3.10/dist-packages/math3d/utils.py
-
-WITH CAMERA AND X11:
+## FAQ
+* Почему не MoveIt???
+* Ошибка с python-urx, патч библиотеки для свежего python
