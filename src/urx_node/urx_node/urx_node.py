@@ -86,7 +86,7 @@ class UrxNode(Node):
 
 
         # Declare node params with defaults
-        self.declare_parameter('ip', "192.168.2.65")
+        self.declare_parameter('ip', "192.168.1.2")
         self.declare_parameter('popup_message', "Манипулятор захвачен RobotX")
         self.declare_parameter('status_publish_rate', 0.5)
         self.declare_parameter('gripper_start_pose', 0)

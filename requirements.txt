@@ -1,5 +1,5 @@
 gevent-websocket
 flask
 flask_socketio
-python3-urx
+https://github.com/jkur/python-urx/archive/SW3.5.zip
 opencv-python
