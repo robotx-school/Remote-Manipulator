@@ -9,7 +9,7 @@ import logging
 import threading
 import time
 
-#from urx.robotiq_two_finger_gripper import Robotiq_Two_Finger_Gripper
+from urx.robotiq_two_finger_gripper import Robotiq_Two_Finger_Gripper
 
 
 
@@ -33,8 +33,8 @@ class Robot:
         while not self.connected and connect_attempt < self.connect_max_attempts:
             try:
                 self.robot_conn = urx.Robot(ip)
-                #self.robotiqgrip = Robotiq_Two_Finger_Gripper(self.robot_conn)
-                #self.robotiqgrip.gripper_action(self.gripper_start_pose) # Set gripper to 0
+                self.robotiqgrip = Robotiq_Two_Finger_Gripper(self.robot_conn)
+                self.robotiqgrip.gripper_action(self.gripper_start_pose) # Set gripper to 0
                 self.gripper_pose = self.gripper_start_pose
                 self.ip = ip
                 self.connected = True
