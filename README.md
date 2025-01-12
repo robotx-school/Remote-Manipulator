@@ -6,26 +6,7 @@
 
 Система для безопасного управления удалённым манипулятором (без физического доступа к нему).
 
-## Запуск
-Если у вас уже установлен ROS2 Humble, если нет рекомендуем ознакомиться с этой [статьёй](https://habr.com/ru/articles/768048/) или [офф.документацией](https://docs.ros.org/en/humble/Installation/Ubuntu-Install-Debians.html). Установить достаточно минимальную версию и инструменты разработки(`ros-humble-ros-base`, `ros-dev-tools`). Обязательно установите пакет `ros-humble-cv-bridge`.
-
-### Подготовка
-```bash
-source /opt/ros/humble/setup.bash # Опционально
-cd ~/some_ws/
-git clone https://github.com/robotx-school/Remote-Manipulator
-```
-
-### Сборка всех пакетов проекта:
-```bash
-colcon build .
-source install/local_setup.bash
-```
-
-### Запуск
-```bash
-ros2 launch Remote-Manipulator/launch/launch_all.py
-```
+[Инструкция по запуску](./INSTALL.md)
 
 ## Настройка
 TODO
