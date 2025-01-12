@@ -15,7 +15,7 @@
 /urx_node:
   ros__parameters:
     ip: "192.168.1.2"
-    popup_message: "Манипулятор захвачен RobotX\nManipulator occupied by RobotX"
+    popup_message: "Dashboard message"
     status_publish_rate: 0.5 # second
     gripper_start_pose: 0 # 0 - 255
     gripper_step: 10 # 0 - 255
