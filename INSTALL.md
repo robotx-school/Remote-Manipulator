@@ -13,11 +13,10 @@ mkdir test_ws
 cd test_ws
 git clone https://github.com/robotx-school/Remote-Manipulator
 pip3 install -r requirements.txt
-colcon build --symlink-install
 ```
 
 ### Configuration:
-Edit file: `params/config.yaml`
+Edit file: `Remote-Manipulator/src/bringup/launch/params.yaml`
 
 ```
 ip: "192.168.1.2"  # robot ip
@@ -26,10 +25,11 @@ field_camera_path: # camera path (device from /dev/v4l/by-path/)
 
 ### Run:
 ```bash
-cd ~/test_ws/Remote-Manipulator
+cd ~/test_ws/
+colcon build
 source /opt/ros/humble/setup.bash
 source install/setup.bash
-ros2 launch launch/launch_all.py
+ros2 launch bringup all.py
 ```
 
 ## URX auto fix
