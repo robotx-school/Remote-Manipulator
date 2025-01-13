@@ -27,6 +27,8 @@ field_camera_path: # camera path (device from /dev/v4l/by-path/)
 ### Run:
 ```bash
 cd ~/test_ws/Remote-Manipulator
+source /opt/ros/humble/setup.bash
+source install/setup.bash
 ros2 launch launch/launch_all.py
 ```
 
