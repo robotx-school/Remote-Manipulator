@@ -5,7 +5,6 @@ import struct
 import pickle
 
 
-
 class CameraClient:
     def __init__(self, ip: str, port: int, use_fallback: bool = False) -> None:
         self.ip = ip
@@ -49,7 +48,7 @@ class CameraClient:
 
 
 if __name__ == "__main__":
-    camera = CameraClient("172.44.44.70", 9988)
+    camera = CameraClient("localhost", 9988)
     while True:
         frame = camera.get_frame()
         print(frame.shape)
