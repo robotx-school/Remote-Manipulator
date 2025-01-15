@@ -1,3 +1,4 @@
+# Cameras params
 /camera_node:
   ros__parameters:
     general_camera_path: "/dev/v4l/by-path/platform-5200000.usb-usb-0:1:1.0-video-index0"
@@ -6,32 +7,34 @@
     frame_width: 640
     frame_height: 480
 
+# Web interface params
 /flask_node:
   ros__parameters:
-    port: 8080
-    host: "0.0.0.0"
+    port: 8080 # http port for web interface
+    host: "0.0.0.0" # listen from ips (0.0.0.0 - all)
     joystick_offset: 0.01 # meters
 
+# Manipulator params
 /urx_node:
   ros__parameters:
-    ip: "192.168.1.2"
-    popup_message: "Dashboard message"
-    status_publish_rate: 0.5 # second
-    gripper_start_pose: 0 # 0 - 255
-    gripper_step: 10 # 0 - 255
+    ip: "192.168.54.142" # Robot IP address
+    popup_message: "Dashboard message" # Message shown on manipulator display when system launch
+    status_publish_rate: 0.5 # seconds to refresh current manipulator status
+    gripper_start_pose: 0 # 0 - 255; gripper position on system init
+    gripper_step: 10 # 0 - 255; gripper step for web buttons
 
-
+# Robot limits control
 /robot_control:
   ros__parameters:
-    gripper:
+    gripper: # limits in range [0, 255]
       max: 100
       min: 0
     movel: # meters
-      x_min: -0.4
-      x_max: 0.1
+      x_min: -0.26
+      x_max: 0.26
 
-      y_max: 0.3
-      y_min: -0.3
+      y_max: -0.2
+      y_min: -0.4
 
       z_min: 0.0
       z_max: 0.35
